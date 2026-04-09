@@ -6,50 +6,68 @@ Full project context, architecture, tech stack, UX guidelines, and compliance ru
 
 ---
 
+## Monorepo Layout
+
+The actual monorepo lives inside `project-link/` at the repo root. Run all commands from there unless noted otherwise.
+
+```text
+project-link/
+  apps/
+    web/          Next.js 16 App Router — internal dashboard + BHW PWA
+    api/          FastAPI scaffold — health-domain logic, reporting, analytics
+  packages/
+    supabase/     Supabase CLI config and migrations
+    eslint-config/
+    typescript-config/
+  turbo.json
+  pnpm-workspace.yaml
+  package.json
+```
+
+---
+
 ## Development Commands
 
-### Monorepo (from root)
+### Monorepo (from `project-link/`)
 
 ```bash
 pnpm turbo dev      # run all apps in dev mode
 pnpm turbo build    # build all apps
 pnpm turbo lint     # lint all apps
-pnpm test           # run unit tests across all apps
-pnpm test:e2e       # run Playwright e2e tests (requires app running or CI)
+pnpm turbo check-types
 ```
 
-### `apps/web` (Next.js)
+### `apps/web` (Next.js 16 + React 19)
 
 ```bash
-cd apps/web
+cd project-link/apps/web
 pnpm dev            # http://localhost:3000
 pnpm build
 pnpm lint
-pnpm test           # vitest watch mode
-pnpm test:run       # vitest single run
 ```
 
-> **Warning:** Next.js 16.x has breaking changes. Before writing any Next.js code, read `apps/web/node_modules/next/dist/docs/` for current API and file conventions.
+> **Warning:** Next.js 16.x has breaking changes. Before writing any Next.js code, read `project-link/apps/web/node_modules/next/dist/docs/` for current API and file conventions.
 
 ### `apps/api` (FastAPI)
 
 ```bash
-cd apps/api
+cd project-link/apps/api
 .venv/Scripts/Activate.ps1   # Windows
 source .venv/bin/activate     # Unix
 fastapi dev app/main.py       # http://127.0.0.1:8000 — docs at /docs
 ```
 
-### Supabase (from root)
+### Supabase (from `project-link/packages/supabase/`)
 
 ```bash
+cd project-link/packages/supabase
 pnpm exec supabase start                        # requires Docker
 pnpm exec supabase migration new <name>
 pnpm exec supabase db push
 pnpm exec supabase link --project-ref <ref>
 ```
 
-### shadcn/ui (from `apps/web`)
+### shadcn/ui (from `project-link/apps/web/`)
 
 ```bash
 npx shadcn@latest info --json          # confirm config + installed components

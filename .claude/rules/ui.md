@@ -11,7 +11,7 @@ Applies to every agent working in this repository.
 
 ## 2) Required shadcn Workflow
 
-For any UI task in `frontend/`, follow this order:
+For any UI task in `project-link/apps/web/`, follow this order:
 
 1. `npx shadcn@latest info --json` to confirm project config and installed components.
 2. `npx shadcn@latest search` to discover existing components first.
@@ -28,18 +28,19 @@ Additional enforcement:
 
 When an agent handles frontend, design system, or PWA UI tasks, it must use these skills:
 
-- `D:\project-link\.agents\skills\shadcn\SKILL.md`
-- `D:\project-link\.agents\skills\tailwindcss-mobile-first\SKILL.md`
-- `D:\project-link\.agents\skills\frontend-design\SKILL.md`
-- `D:\project-link\.agents\skills\ui-ux-pro-max\SKILL.md`
-- `D:\project-link\.agents\skills\vercel-react-best-practices\SKILL.md`
+- `D:\capstone\.agents\skills\shadcn\SKILL.md`
+- `D:\capstone\.agents\skills\web-design-guidelines\SKILL.md`
+- `D:\capstone\.agents\skills\frontend-design\SKILL.md`
+- `D:\capstone\.agents\skills\ui-ux-pro-max\SKILL.md`
+- `D:\capstone\.agents\skills\vercel-react-best-practices\SKILL.md`
+- `D:\capstone\.agents\skills\next-best-practices\SKILL.md`
 
 Execution priority:
 
 1. `shadcn` (component choice and composition)
-2. `tailwindcss-mobile-first` (responsive implementation)
+2. `web-design-guidelines` (responsive and mobile-first implementation)
 3. `frontend-design` + `ui-ux-pro-max` (visual quality and UX clarity)
-4. `vercel-react-best-practices` (React performance and rendering quality)
+4. `vercel-react-best-practices` + `next-best-practices` (React/Next.js performance and rendering quality)
 
 ## 4) BHW PWA Mobile-First Requirements (Non-Negotiable)
 
@@ -61,8 +62,8 @@ Execution priority:
 
 ## 6) Project-Specific Frontend Constraints
 
-- Respect current shadcn setup: `style: base-nova`, `base: base`, `iconLibrary: lucide`.
-- Use Tailwind v4 CSS-first approach; keep tokens in `frontend/src/index.css`.
+- Respect current shadcn setup: `style: radix-nova`, `baseColor: mist`, `iconLibrary: lucide`.
+- Use Tailwind v4 CSS-first approach; keep tokens in `project-link/apps/web/app/globals.css`.
 - Do not introduce `tailwind.config.js`.
 - Use `@/` alias for internal imports.
 

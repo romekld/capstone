@@ -11,7 +11,13 @@
 		"Vercel": {
 			"url": "https://mcp.vercel.com",
 			"type": "http"
-		}
+		},
+		"playwright": {
+			"command": "npx",
+			"args": [
+				"@playwright/mcp@latest"
+			]
+		},
 	},
 	"inputs": []
 }
