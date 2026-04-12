@@ -1,23 +1,11 @@
 {
-	"servers": {
-		"shadcn": {
-			"command": "npx",
-			"args": [
-				"shadcn@latest",
-				"mcp"
-			],
-			"type": "stdio"
-		},
-		"Vercel": {
-			"url": "https://mcp.vercel.com",
-			"type": "http"
-		},
-		"playwright": {
-			"command": "npx",
-			"args": [
-				"@playwright/mcp@latest"
-			]
-		},
-	},
-	"inputs": []
+  "servers": {
+    "shadcn": {
+      "command": "npx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
+    }
+  }
 }
