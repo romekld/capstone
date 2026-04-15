@@ -1,5 +1,10 @@
 {
   "enabledPlugins": {
     "vercel@claude-plugins-official": false
+  },
+  "permissions": {
+    "allow": [
+      "mcp__plugin_supabase_supabase__generate_typescript_types"
+    ]
   }
 }
