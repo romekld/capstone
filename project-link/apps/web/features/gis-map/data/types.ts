@@ -1,0 +1,58 @@
+export type GisPosition = [number, number] | [number, number, number]
+
+export type GisPolygonCoordinates = GisPosition[][]
+
+export type GisMultiPolygonCoordinates = GisPolygonCoordinates[]
+
+export type GisGeometry =
+  | {
+      type: 'Polygon'
+      coordinates: GisPolygonCoordinates
+    }
+  | {
+      type: 'MultiPolygon'
+      coordinates: GisMultiPolygonCoordinates
+    }
+
+export type GisMapStyleMode = 'light' | 'dark'
+
+export type GisMapPopupState = {
+  id: string
+  lngLat: {
+    lng: number
+    lat: number
+  }
+  point: {
+    x: number
+    y: number
+  }
+}
+
+export type GisPolygonFeatureProperties = {
+  id: string
+  name: string
+  pcode: string
+  inCho2Scope: boolean
+  [key: string]: string | number | boolean | null
+}
+
+export type GisPolygonFeature = {
+  type: 'Feature'
+  id?: string | number
+  geometry: GisGeometry
+  properties: GisPolygonFeatureProperties
+}
+
+export type GisPolygonFeatureCollection = {
+  type: 'FeatureCollection'
+  features: GisPolygonFeature[]
+}
+
+export type GisPreviewFeatureCollection = {
+  type: 'FeatureCollection'
+  features: Array<{
+    type: 'Feature'
+    geometry: GisGeometry
+    properties: Record<string, never>
+  }>
+}

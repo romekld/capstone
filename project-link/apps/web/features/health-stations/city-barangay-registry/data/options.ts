@@ -1,3 +1,4 @@
+import type React from 'react'
 import {
   AlertTriangleIcon,
   CheckCircle2Icon,
@@ -71,4 +72,3 @@ export const validityOptions = [
     icon: AlertTriangleIcon,
   },
 ]
-

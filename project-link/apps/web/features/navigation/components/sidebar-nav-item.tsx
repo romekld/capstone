@@ -2,6 +2,12 @@
 
 import Link from "next/link"
 import { ChevronRightIcon } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 import {
   Collapsible,
@@ -14,9 +20,13 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import type { SidebarItem } from "../data/types"
-import { isActiveNavItem } from "../utils/is-active-nav-item"
+import {
+  hasActiveNavDescendant,
+  isNavItemSelfActive,
+} from "../utils/is-active-nav-item"
 
 type SidebarNavItemProps = {
   item: SidebarItem
@@ -24,18 +34,64 @@ type SidebarNavItemProps = {
 }
 
 export function SidebarNavItem({ item, pathname }: SidebarNavItemProps) {
-  const isActive = isActiveNavItem(pathname, item)
+  const { isMobile, state } = useSidebar()
+  const isSelfActive = isNavItemSelfActive(pathname, item)
+  const hasActiveChild = hasActiveNavDescendant(pathname, item)
+  const isParentActive = isSelfActive && !hasActiveChild
+  const isCollapsed = state === "collapsed" && !isMobile
+  const isChildMenuOpenByDefault = isSelfActive || hasActiveChild
 
   if (item.children?.length) {
+    if (isCollapsed) {
+      return (
+        <DropdownMenu>
+          <SidebarMenuItem>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton
+                isActive={isParentActive}
+                tooltip={item.title}
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              >
+                {item.icon ? <item.icon /> : null}
+                <span>{item.title}</span>
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              side={isMobile ? "bottom" : "right"}
+              align={isMobile ? "end" : "start"}
+              className="min-w-56 rounded-lg"
+            >
+              {item.children.map((child) => {
+                const isChildActive = isNavItemSelfActive(pathname, child)
+
+                return (
+                  <DropdownMenuItem
+                    asChild
+                    key={child.id}
+                    className={isChildActive ? "bg-accent text-accent-foreground" : undefined}
+                  >
+                    <Link href={child.href ?? "#"}>
+                      {child.icon ? <child.icon /> : null}
+                      <span>{child.title}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )
+              })}
+            </DropdownMenuContent>
+          </SidebarMenuItem>
+        </DropdownMenu>
+      )
+    }
+
     return (
       <Collapsible
         asChild
-        defaultOpen={isActive}
+        defaultOpen={isChildMenuOpenByDefault}
         className="group/collapsible"
       >
         <SidebarMenuItem>
           <CollapsibleTrigger asChild>
-            <SidebarMenuButton isActive={isActive} tooltip={item.title}>
+            <SidebarMenuButton isActive={isParentActive} tooltip={item.title}>
               {item.icon ? <item.icon /> : null}
               <span>{item.title}</span>
               <ChevronRightIcon className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
@@ -47,7 +103,7 @@ export function SidebarNavItem({ item, pathname }: SidebarNavItemProps) {
                 <SidebarMenuSubItem key={child.id}>
                   <SidebarMenuSubButton
                     asChild
-                    isActive={isActiveNavItem(pathname, child)}
+                    isActive={isNavItemSelfActive(pathname, child)}
                   >
                     <Link href={child.href ?? "#"}>
                       {child.icon ? <child.icon /> : null}
@@ -71,7 +127,7 @@ export function SidebarNavItem({ item, pathname }: SidebarNavItemProps) {
     <SidebarMenuItem>
       <SidebarMenuButton
         asChild
-        isActive={isActive}
+        isActive={isSelfActive}
         tooltip={item.title}
       >
         <Link href={item.href}>

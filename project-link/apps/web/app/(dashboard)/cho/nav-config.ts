@@ -1,4 +1,4 @@
-import { Building2Icon } from "lucide-react"
+import { Building2Icon, MapIcon } from "lucide-react"
 
 import type { SidebarSection } from "@/features/navigation/data/types"
 
@@ -13,6 +13,21 @@ export const choNavSections = [
         href: "/cho/dashboard",
         icon: Building2Icon,
         match: ["/cho/dashboard"],
+      },
+      {
+        id: "cho-health-stations",
+        title: "Health Stations",
+        icon: Building2Icon,
+        match: ["/cho/health-stations", "/cho/health-stations/*"],
+        children: [
+          {
+            id: "cho-health-stations-city-barangays",
+            title: "City Barangays",
+            href: "/cho/health-stations/city-barangays",
+            icon: MapIcon,
+            match: ["/cho/health-stations/city-barangays"],
+          },
+        ],
       },
     ],
   },
