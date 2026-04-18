@@ -168,14 +168,12 @@ export function getUsersColumns({
       enableHiding: false,
     },
     {
-      accessorKey: 'passwordState',
+      accessorKey: 'mustChangePassword',
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title='Password state' />
       ),
-      cell: ({ row }) => {
-        const value = row.original.passwordState
-        return value === 'change_pending' ? 'Change pending' : 'Updated'
-      },
+      cell: ({ row }) =>
+        row.original.mustChangePassword ? 'Change pending' : 'Updated',
       filterFn: (row, id, values) => {
         const list = values as string[]
         if (!list?.length) return true

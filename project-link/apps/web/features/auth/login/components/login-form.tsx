@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import * as React from "react"
+import { useActionState } from "react"
 import { ShieldCheckIcon, EyeIcon, EyeOffIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -13,15 +14,16 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { loginAction } from "../actions"
 
 export function LoginForm({
   className,
-  ...props
 }: React.ComponentProps<"form">) {
+  const [state, action, pending] = useActionState(loginAction, null)
   const [showPassword, setShowPassword] = React.useState(false)
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form action={action} className={cn("flex flex-col gap-6", className)}>
       <FieldGroup>
         <div className="flex flex-col gap-1 text-left">
           <h1 className="text-2xl font-heading font-bold">Login</h1>
@@ -29,10 +31,16 @@ export function LoginForm({
             Enter your credentials to continue
           </p>
         </div>
+        {state?.error && (
+          <Alert variant="destructive" className="p-3">
+            <AlertDescription>{state.error}</AlertDescription>
+          </Alert>
+        )}
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input
             id="email"
+            name="email"
             type="email"
             placeholder="name@cho2.gov.ph"
             required
@@ -52,6 +60,7 @@ export function LoginForm({
           <div className="relative">
             <Input
               id="password"
+              name="password"
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               required
@@ -70,7 +79,9 @@ export function LoginForm({
           </div>
         </Field>
         <Field>
-          <Button type="submit" className="h-9">Login</Button>
+          <Button type="submit" className="h-9" disabled={pending}>
+            {pending ? "Logging in…" : "Login"}
+          </Button>
         </Field>
         <Alert className="p-3">
           <ShieldCheckIcon />

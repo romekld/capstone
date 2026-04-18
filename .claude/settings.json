@@ -3,7 +3,8 @@
     "allow": [
       "Bash(pnpm build:*)",
       "Bash(node scripts/seed-admin.mjs)",
-      "Bash(pnpm dev:*)"
+      "Bash(pnpm dev:*)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('name:', d.get\\('name'\\)\\); print\\('packages count:', len\\(d.get\\('packages', {}\\)\\)\\)\")"
     ]
   },
   "statusLine": {

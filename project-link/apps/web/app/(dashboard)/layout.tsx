@@ -26,7 +26,7 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider className="h-svh overflow-hidden">
-      <AppSidebar variant="inset" />
+      <AppSidebar />
       <SidebarInset className="min-h-0 overflow-hidden">
         <DashboardHeader />
         <main

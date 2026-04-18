@@ -1,14 +1,11 @@
 export type UserStatus = 'active' | 'inactive' | 'invited' | 'suspended'
 
-export type UserPasswordState = 'change_pending' | 'updated'
-
 export type UserRole =
   | 'bhw'
-  | 'midwife_rhm'
-  | 'nurse_phn'
-  | 'dso'
-  | 'phis_coordinator'
-  | 'city_health_officer'
+  | 'rhm'
+  | 'phn'
+  | 'phis'
+  | 'cho'
   | 'system_admin'
 
 export type AdminUser = {
@@ -27,6 +24,7 @@ export type AdminUser = {
   status: UserStatus
   role: UserRole
   healthStationName: string | null
-  passwordState: UserPasswordState
+  healthStationId: string | null
+  mustChangePassword: boolean
   lastLoginAt: string | null
 }

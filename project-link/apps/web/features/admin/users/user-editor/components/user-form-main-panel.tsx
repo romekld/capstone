@@ -198,7 +198,7 @@ export function UserFormMainPanel({
                         <Button
                           type='button'
                           variant='outline'
-                          className='h-10 w-full justify-between font-normal'
+                          className='w-full justify-between font-normal'
                           aria-invalid={!!errors.dateOfBirth}
                         >
                           {field.value ? toReadableDate(field.value) : 'Choose a date'}
