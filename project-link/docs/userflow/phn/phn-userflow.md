@@ -4,17 +4,17 @@
 
 This document defines the end-to-end user flow for the Public Health Nurse (PHN) in Project LINK, based on the digital process flowchart and validated against the official FHSIS Manual of Operations (2018, referenced by DOH DM 2024-0007).
 
-It specifies PHN responsibilities for BHS summary review, city-level consolidation, and handoff to PHIS data-quality review.
+It specifies PHN responsibilities for BHS summary review, city-level consolidation, and handoff to CHO data-quality review.
 
 ## Scope and Role Boundary
 
 - Role: `phn` (Public Health Nurse)
 - Primary surface: CHO dashboard (desktop-first web)
 - Data scope: all submitted BHS reports within city coverage
-- Responsibility: review/approve returned BHS summaries, consolidate approved summaries into city-level outputs, and route outputs to PHIS quality gate
-- Not allowed: final PHIS-level quality approval and final export submission authority reserved for PHIS Coordinator
+- Responsibility: review/approve returned BHS summaries, consolidate approved summaries into city-level outputs, and route outputs to CHO quality gate
+- Not allowed: final CHO-level quality approval and final export submission authority reserved for City Health Officer
 
-PHN is the city-level consolidation authority for approved BHS summaries and the operational bridge between Midwife submissions and PHIS quality clearance.
+PHN is the city-level consolidation authority for approved BHS summaries and the operational bridge between Midwife submissions and CHO quality clearance.
 
 ## Canonical PHN Workflow
 
@@ -83,11 +83,11 @@ Data quality checks include:
 ## 6) Generate and Route City Outputs
 
 1. From validated city consolidation, PHN produces city-level reporting artifacts.
-2. In Project LINK digital flow, city outputs are routed to PHIS dashboard for quality check gate.
-3. PHIS may:
+2. In Project LINK digital flow, city outputs are routed to CHO dashboard for quality check gate.
+3. CHO may:
    - approve for export/submission
    - return discrepancy report to PHN correction loop
-4. If returned, PHN corrects consolidation/report package and resubmits to PHIS.
+4. If returned, PHN corrects consolidation/report package and resubmits to CHO.
 
 ## 7) Reporting Timeline Alignment (FHSIS)
 
@@ -112,13 +112,13 @@ City consolidation statuses:
 
 - `WAITING_BHS_APPROVALS` : one or more barangays not yet approved
 - `MCT_DRAFT_AUTO` : auto-generated city consolidation draft
-- `MCT_VALIDATED_CHO` : PHN-validated city package ready for PHIS gate
+- `MCT_VALIDATED` : PHN-validated city package ready for final DQC
 
-PHIS handoff statuses:
+Final DQC handoff statuses:
 
-- `PENDING_PHIS_DQC` : submitted to PHIS quality check
-- `RETURNED_BY_PHIS` : discrepancy return to PHN
-- `PHIS_DQC_APPROVED` : cleared for export/submission
+- `PENDING_DQC` : submitted to CHO quality check
+- `DQC_RETURNED` : discrepancy return to PHN
+- `DQC_APPROVED` : cleared for export/submission
 
 Recommended UI constraints:
 - prevent consolidation finalization while required barangays remain unapproved
@@ -133,7 +133,7 @@ This PHN digital flow is aligned with official FHSIS process requirements:
 2. PHN/FHSIS functions include validation and quality checks before higher-level reporting.
 3. Quarterly and annual city reporting outputs derive from consolidated monthly data.
 4. Timelines for city-level reporting remain strict and deadline-bound.
-5. In Project LINK, PHN consolidation is followed by PHIS quality gate before final export/submission.
+5. In Project LINK, PHN consolidation is followed by CHO quality gate before final export/submission.
 
 ## Data Quality and Compliance Guards
 
@@ -150,7 +150,7 @@ This PHN digital flow is aligned with official FHSIS process requirements:
 - show blocked-consolidation alert with missing barangay list
 - prioritize follow-up with specific station owners
 
-2. PHIS discrepancy returned after PHN validation:
+2. CHO discrepancy returned after PHN validation:
 - keep discrepancy report attached to affected indicators
 - require targeted correction and resubmission, not silent overwrite
 
@@ -159,7 +159,7 @@ This PHN digital flow is aligned with official FHSIS process requirements:
 - prevent false zeroing of not-yet-arrived datasets
 
 4. Conflicting denominator sources across facilities:
-- enforce denominator consistency checks before PHIS submission
+- enforce denominator consistency checks before CHO submission
 
 5. Large correction wave across multiple barangays:
 - support batch tracking with per-barangay correction state and due dates
@@ -168,11 +168,11 @@ This PHN digital flow is aligned with official FHSIS process requirements:
 
 1. PHN can review every BHS submission and explicitly approve or return it.
 2. Consolidation starts only after required BHS approvals are complete.
-3. PHN can validate city-level consolidated outputs and send them to PHIS.
-4. PHIS-returned discrepancies can be corrected and resubmitted with traceable history.
+3. PHN can validate city-level consolidated outputs and send them to CHO.
+4. CHO-returned discrepancies can be corrected and resubmitted with traceable history.
 5. M2/Q1/A1 deadline risks are visible and actionable in PHN dashboard.
 6. External data integrations (LCR/hospital/school) are reflected in consolidation workflow.
-7. PHN cannot bypass PHIS final quality gate in the Project LINK digital flow.
+7. PHN cannot bypass CHO final quality gate in the Project LINK digital flow.
 
 ## Primary Source Alignment
 

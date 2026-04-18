@@ -20,8 +20,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Seed script** (`scripts/seed-admin.mjs`) — zero-dependency Node script that creates the first `system_admin` account using the Supabase Admin REST API.
 
 ### Changed
+- **Role model simplification** — removed the separate reporting coordinator role from active Project LINK roles; the City Health Officer (`cho`) now owns final DQC, discrepancy returns, report approval, export, submission, and reporting-cycle closure.
+- **Role-code references** — standardized role documentation so `phn` maps to Public Health Nurse and `rhm` maps to Rural Health Midwife.
+- **FHSIS workflow documentation** — updated authored docs and Mermaid flowcharts so the reporting handoff chain is `BHW -> RHM -> PHN -> CHO`.
 - `AdminUser` schema: replaced `passwordState: UserPasswordState` with `mustChangePassword: boolean`; added `healthStationId: string | null`.
-- `UserRole` enum updated to new slugs: `bhw`, `rhm`, `phn`, `phis`, `cho`, `system_admin`.
+- `UserRole` enum updated to new slugs: `bhw`, `rhm`, `phn`, `cho`, `system_admin`.
 - `AdminUsersPage` accepts `initialUsers: AdminUser[]` prop instead of generating mock data internally.
 - `users-mobile-cards.tsx`: updated `passwordState` reference → `mustChangePassword`.
 - `users.ts` mock data: updated role slugs, replaced `passwordState` with `mustChangePassword`, added `healthStationId: null`.
@@ -32,6 +35,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - Mock data generation no longer used on live pages; all data originates from the Supabase DB.
+
+### Removed
+- Removed the standalone reporting-coordinator userflow document; final DQC/export/submission workflow now lives in `docs/userflow/cho/cho-userflow.md`.
 
 ---
 

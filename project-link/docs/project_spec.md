@@ -94,10 +94,9 @@ The product is not being built as a disposable prototype. Even the early UI phas
 | Role | Code | Primary Surface | Core Responsibility |
 |---|---|---|---|
 | System Admin | `system_admin` | Internal dashboard | Platform administration and configuration |
-| City Health Officer | `cho` | Internal dashboard | Oversight and city-level monitoring |
-| PHIS Coordinator | `phis` | Internal dashboard | Data quality review and reporting oversight |
-| Public Health Nurse | `rhm` | Internal dashboard | Consolidation review and city-level workflows |
-| Rural Health Midwife | `phn` | Internal dashboard, mobile-capable web | BHS workflows and record stewardship |
+| City Health Officer | `cho` | Internal dashboard | Oversight, final data-quality review, reporting export/submission, and city-level monitoring |
+| Public Health Nurse | `phn` | Internal dashboard | Consolidation review and city-level workflows |
+| Rural Health Midwife | `rhm` | Internal dashboard, mobile-capable web | BHS workflows and record stewardship |
 | Barangay Health Worker | `bhw` | Mobile-first internal web app | Field capture and follow-up workflows |
 
 ## 5. Current Technical Baseline
@@ -245,7 +244,7 @@ Build the internal dashboard application in `apps/web` so it can accurately repr
 - `apps/web` has a coherent internal dashboard structure
 - the root route and future route tree reflect internal product use, not public marketing use
 - all major roles have identifiable workflow entry points
-- role workflows in the UI can be traced to the digital flowchart hand-offs (BHW -> RHM -> PHN -> PHIS)
+- role workflows in the UI can be traced to the digital flowchart hand-offs (BHW -> RHM -> PHN -> CHO)
 - UI architecture is ready for future backend and database wiring
 - mock data and placeholders are isolated so they can be replaced later
 

@@ -2,19 +2,11 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getRoleHome } from '@/features/navigation/data/role-policy'
 
 export type LoginState =
   | { error: string }
   | null
-
-const ROLE_HOME: Record<string, string> = {
-  system_admin: '/admin/users',
-  cho: '/dashboard',
-  phis: '/dashboard',
-  phn: '/dashboard',
-  rhm: '/dashboard',
-  bhw: '/bhw',
-}
 
 export async function loginAction(
   _prevState: LoginState,
@@ -56,5 +48,12 @@ export async function loginAction(
     return { error: 'Account profile not found. Contact your administrator.' }
   }
 
-  redirect(ROLE_HOME[profile.role] ?? '/dashboard')
+  const roleHome = getRoleHome(profile.role)
+
+  if (!roleHome) {
+    await supabase.auth.signOut()
+    return { error: 'This role is not enabled for the dashboard yet.' }
+  }
+
+  redirect(roleHome)
 }

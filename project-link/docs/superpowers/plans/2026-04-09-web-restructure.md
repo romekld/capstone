@@ -210,8 +210,8 @@ describe('ROLE_HOME', () => {
   it('bhw home is /bhw/dashboard', () => {
     expect(ROLE_HOME.bhw).toBe('/bhw/dashboard')
   })
-  it('cho and phis share the same oversight home', () => {
-    expect(ROLE_HOME.cho).toBe(ROLE_HOME.phis)
+  it('cho home is /oversight/dashboard', () => {
+    expect(ROLE_HOME.cho).toBe('/oversight/dashboard')
   })
   it('rhm and phn share the same clinical home', () => {
     expect(ROLE_HOME.rhm).toBe(ROLE_HOME.phn)
@@ -224,9 +224,8 @@ describe('ROLE_TIER', () => {
     expect(ROLE_TIER.phn).toBe('clinical')
     expect(ROLE_TIER.rhm).toBe('clinical')
   })
-  it('cho and phis → oversight tier', () => {
+  it('cho → oversight tier', () => {
     expect(ROLE_TIER.cho).toBe('oversight')
-    expect(ROLE_TIER.phis).toBe('oversight')
   })
   it('system_admin → admin tier', () => {
     expect(ROLE_TIER.system_admin).toBe('admin')
@@ -257,7 +256,6 @@ Expected: FAIL — `Cannot find module './roles'`
 export const ROLES = [
   'system_admin',
   'cho',
-  'phis',
   'rhm',
   'phn',
   'bhw',
@@ -270,7 +268,6 @@ export type RoleTier = 'admin' | 'oversight' | 'clinical' | 'bhw'
 export const ROLE_TIER = {
   system_admin: 'admin',
   cho:          'oversight',
-  phis:         'oversight',
   rhm:          'clinical',
   phn:          'clinical',
   bhw:          'bhw',
@@ -279,7 +276,6 @@ export const ROLE_TIER = {
 export const ROLE_HOME: Record<Role, string> = {
   system_admin: '/admin/users',
   cho:          '/oversight/dashboard',
-  phis:         '/oversight/dashboard',
   rhm:          '/clinical/dashboard',
   phn:          '/clinical/dashboard',
   bhw:          '/bhw/dashboard',

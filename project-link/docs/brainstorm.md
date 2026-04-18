@@ -70,10 +70,9 @@ CHO 2 serves 164,691 people but lacks the tools to manage their health informati
 | Role | Code | Access Mode | Clinical Scope | Data Scope | Primary Function |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **System Admin** | `system_admin` | Web only | None | System-wide | Manages RLS policies, users, and mapping. |
-| **City Health Officer** | `cho` | Web + Mobile | Read-only | All 32 BHS | Monitors GIS/ML; signs final M1/M2. |
-| **PHIS Coordinator** | `phis` | Web only | Read-only | All 32 BHS | Auditor: Performs final DQC; manages exports. |
-| **Public Health Nurse** | `rhm` | Web only | Full CRUD | All 32 BHS | Aggregator: Reviews STs to generate MCT. |
-| **Rural Health Midwife** | `phn` | Web + Mobile | Full CRUD | Own BHS Only | Record Keeper: Manages ITR/TCL; creates ST. |
+| **City Health Officer** | `cho` | Web + Mobile | Read-only | All 32 BHS | Monitors GIS/ML; performs final DQC, exports/submits reports, and signs final M1/M2. |
+| **Public Health Nurse** | `phn` | Web only | Full CRUD | All 32 BHS | Aggregator: Reviews STs to generate MCT. |
+| **Rural Health Midwife** | `rhm` | Web + Mobile | Full CRUD | Own BHS Only | Record Keeper: Manages ITR/TCL; creates ST. |
 | **Barangay Health Worker** | `bhw` | Mobile-first | Create (Pending) | Assigned Purok | Field Data Capture: Entry of point-of-care services. |
 
 ---
@@ -96,7 +95,7 @@ The narrative in this document is anchored to two canonical process diagrams:
 - `docs/diagrams/flowcharts/manual-fhsis-process-flowchart.md` for the legacy paper workflow
 - `docs/diagrams/flowcharts/digital-fhsis-process-flowchart.md` for the Project LINK target workflow
 
-These diagrams should be treated as the visual source of truth for hand-offs, validation gates, and return loops across BHW, Midwife, PHN, and PHIS roles.
+These diagrams should be treated as the visual source of truth for hand-offs, validation gates, and return loops across BHW, Midwife, PHN, and CHO roles.
 
 ### 6.1 ITR & TCL Entry (Point of Care)
 
@@ -120,10 +119,10 @@ These diagrams should be treated as the visual source of truth for hand-offs, va
 
 ### 6.4 Reporting & Alerting
 
-- **Trigger:** PHIS Coordinator verification of the MCT.
+- **Trigger:** CHO verification of the MCT.
 - **Output:** Auto-generation of official M1/M2 reports.
 - **Emergency:** Category I cases trigger immediate WebSocket alerts to the DSO (RA 11332 compliance).
-- **Flowchart Alignment:** PHIS data-quality check has an explicit return path before export/submission.
+- **Flowchart Alignment:** CHO data-quality check has an explicit return path before export/submission.
 
 ---
 

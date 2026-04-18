@@ -5,7 +5,7 @@
 - M1: Routing and role contract scaffolding for `apps/web`
 - M2: Shared shell composition and dynamic sidebar data layer
 - M3: System admin user management pages and Supabase auth wiring
-- M4: Role-aware navigation rollout for CHO, PHIS, RHM, PHN, BHW
+- M4: Role-aware navigation rollout for CHO, RHM, PHN, BHW
 
 ## Accomplished
 

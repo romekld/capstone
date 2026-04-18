@@ -45,8 +45,6 @@ apps/
    │  │  │     └─ ... (other files/folders)
    │  │  ├─ cho/
    │  │  │  └─ dashboard/
-   │  │  ├─ phis/
-   │  │  │  └─ dashboard/
    │  │  ├─ phn/
    │  │  │  └─ dashboard/
    │  │  └─ rhm/

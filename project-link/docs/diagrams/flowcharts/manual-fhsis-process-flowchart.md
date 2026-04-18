@@ -48,12 +48,12 @@ flowchart LR
       phn_aggregate --> phn_annual[[City-Wide Annual Reports]]
     end
 
-    subgraph PHIS["PHIS Coordinator"]
+    subgraph CHO["City Health Officer"]
       direction TB
-      phis_qc[Conduct Manual Data Quality Check]
-      phis_qc --> phis_encode[Encode Monthly and Annual Reports to DOH Excel-Based E-Tools]
-      phis_encode --> phis_submit[Submit Reports to Provincial Health Office via DOH Excel-Based E-Tools]
-      phis_submit --> phis_end([End])
+      cho_qc[Conduct Manual Data Quality Check]
+      cho_qc --> cho_encode[Encode Monthly and Annual Reports to DOH Excel-Based E-Tools]
+      cho_encode --> cho_submit[Submit Reports via DOH Excel-Based E-Tools]
+      cho_submit --> cho_end([End])
     end
   end
 
@@ -61,8 +61,8 @@ flowchart LR
   bhw_submit --> rhm_compile
   pat_itr --> rhm_targets
   rhm_submit --> phn_consolidate
-  phn_monthly --> phis_qc
-  phn_annual --> phis_qc
+  phn_monthly --> cho_qc
+  phn_annual --> cho_qc
 
   %% Visual grouping by artifact type (optional)
   classDef form fill:#efe7c6,stroke:#7a6a2a,color:#222;

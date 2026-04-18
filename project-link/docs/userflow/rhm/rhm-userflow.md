@@ -12,7 +12,7 @@ It specifies the Midwife's validation authority at BHS level, reporting obligati
 - Primary surface: dashboard web (with mobile-capable access as needed)
 - Data scope: own BHS catchment and assigned submissions
 - Responsibility: validate BHW submissions, maintain master lists/TCL/registries, approve and submit BHS summary outputs
-- Not allowed: city-wide consolidation (MCT), final city-level DQC/export authority, provincial submission as PHIS
+- Not allowed: city-wide consolidation (MCT), final city-level DQC/export authority, or higher-level report submission reserved for CHO
 
 The Midwife is the accountable BHS reporting gatekeeper. No BHW submission can affect official consolidation before Midwife validation.
 
@@ -175,7 +175,7 @@ This Midwife digital flow is aligned with official FHSIS process requirements:
 4. Midwife can approve and submit BHS summary outputs to CHO.
 5. Returned CHO summaries can be corrected and resubmitted with full audit trail.
 6. Deadline tracking for M1/M2/A-Barangay is visible and actionable.
-7. Midwife cannot perform PHN/PHIS-only actions (MCT-wide consolidation, final DQC/export submission).
+7. Midwife cannot perform PHN/CHO-only actions (MCT-wide consolidation, final DQC/export submission).
 
 ## Primary Source Alignment
 

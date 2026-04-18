@@ -151,7 +151,6 @@ git commit -m "feat(web): install shadcn components for dashboard shell"
 export type UserRole =
   | 'system_admin'
   | 'cho'
-  | 'phis'
   | 'rhm'
   | 'phn'
   | 'bhw'
@@ -159,18 +158,16 @@ export type UserRole =
 export const ROLE_LABELS: Record<UserRole, string> = {
   system_admin: 'System Admin',
   cho: 'City Health Officer',
-  phis: 'PHIS Coordinator',
-  rhm: 'Public Health Nurse',
-  phn: 'Rural Health Midwife',
+  phn: 'Public Health Nurse',
+  rhm: 'Rural Health Midwife',
   bhw: 'Barangay Health Worker',
 }
 
 export const ROLE_SHORT: Record<UserRole, string> = {
   system_admin: 'Admin',
   cho: 'CHO',
-  phis: 'PHIS',
-  rhm: 'PHN',
-  phn: 'RHM',
+  phn: 'PHN',
+  rhm: 'RHM',
   bhw: 'BHW',
 }
 ```

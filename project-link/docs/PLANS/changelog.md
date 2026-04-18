@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Changed the Project LINK role model to remove the separate reporting coordinator role from active role references. Final DQC, discrepancy returns, report approval, export, submission, and reporting-cycle closure are now assigned to CHO.
+- Changed role-code documentation examples so `phn` maps to Public Health Nurse and `rhm` maps to Rural Health Midwife.
+- Changed authored workflow docs and Mermaid flowcharts to use the handoff chain `BHW -> RHM -> PHN -> CHO`.
 - Changed `apps/web/app/(internal)/layout.tsx` from a `"use client"` pathname-aware wrapper to a **Server Component** that owns `SidebarProvider` and `AppSidebar`. Shell data is resolved server-side via `getMockRole()` + `getShellData()`. Eliminates the client boundary at the layout root that would have blocked future Supabase session reads.
 - Changed `apps/web/components/app-sidebar.tsx` to accept `shellData: ShellData` prop instead of inline static config. Nav groups and quick links rendered dynamically. Icon components resolved via local `ICON_MAP` keyed by `iconKey` string — no JSX in config data.
 - Changed `apps/web/components/nav-main.tsx` to accept optional `groupLabel` prop (defaults to `"Modules"`) and branch on `item.items?.length`: items with children use `Collapsible` with chevron; items without children render as plain `SidebarMenuButton` + `Link` with no chevron and no collapsible wrapper.
@@ -28,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- Removed the standalone reporting-coordinator userflow from active docs; its DQC/export/submission workflow is now merged into the CHO userflow.
 - Removed `apps/web/components/team-switcher.tsx` — `TeamSwitcher` permanently retired. Replaced by static `SidebarBrand`. This is a single-org system; no team/org switching concept exists.
 - Removed all inline static nav config objects (`data.teams`, `data.navMain`, `data.projects`, `data.user`) from `app-sidebar.tsx`. Sidebar now contains zero hardcoded navigation.
 - Removed `SidebarProvider` and `AppSidebar` from `dashboard/page.tsx` — both moved to the shared layout.

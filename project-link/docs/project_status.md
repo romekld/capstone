@@ -45,5 +45,5 @@
 - BHW mobile-first ITR entry form (offline-capable, IndexedDB buffered).
 - Midwife/RHM approval gate: review and promote pending BHW entries.
 - TCL module shells for: Maternal Care, Immunization, TB-DOTS, NCD.
-- Role dashboards for `cho`, `phis`, `phn`, `rhm` (currently shell only).
+- Role dashboards for `cho`, `phn`, `rhm` (currently shell only).
 - BHW `/bhw` mobile dashboard (currently shell only).

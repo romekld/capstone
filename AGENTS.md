@@ -33,7 +33,7 @@ Update the relevant `docs/` files after completing a major milestone or making a
 
 **BHS Tier** — 32 barangay health stations. BHWs capture visits offline; Midwives validate and manage TCL records; Midwives generate end-of-month Summary Tables (ST).
 
-**CHO Tier** — city-wide. Public Health Nurses consolidate 32 STs into a Monthly Consolidation Table (MCT); PHIS Coordinator runs DQC and exports M1/M2 reports; CHO monitors real-time disease alerts.
+**CHO Tier** — city-wide. Public Health Nurses consolidate 32 STs into a Monthly Consolidation Table (MCT); the City Health Officer runs final DQC, exports/submits M1/M2 reports, and monitors real-time disease alerts.
 
 ### Zero-Tally architecture
 
@@ -56,9 +56,8 @@ BHWs work in remote puroks without connectivity. The PWA uses **Dexie.js** (Inde
 | :--- | :--- | :--- |
 | `system_admin` | System Admin | Internal dashboard |
 | `cho` | City Health Officer | Internal dashboard |
-| `phis` | PHIS Coordinator | Internal dashboard |
-| `rhm` | Public Health Nurse | Internal dashboard |
-| `phn` | Rural Health Midwife | Dashboard + mobile-capable web |
+| `phn` | Public Health Nurse | Internal dashboard |
+| `rhm` | Rural Health Midwife | Dashboard + mobile-capable web |
 | `bhw` | Barangay Health Worker | Mobile-first web app |
 
 ---
@@ -162,7 +161,7 @@ Clean and minimal. Prioritize information clarity over decoration. All layouts m
 
 **Progressive form saving (PWA):** Long clinical forms (maternal, NCD) must auto-save to IndexedDB as the user fills them out — recoverable if the app is closed mid-form.
 
-**Keyboard navigation (web):** PHN and PHIS Coordinator dashboards are desktop-heavy. All tables, modals, and form flows must be fully keyboard-navigable.
+**Keyboard navigation (web):** PHN and CHO reporting dashboards are desktop-heavy. All tables, modals, and form flows must be fully keyboard-navigable.
 
 **ARIA live regions for alerts:** WebSocket alerts must use ARIA live regions so they are announced to screen readers.
 

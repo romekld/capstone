@@ -2,31 +2,21 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { MustChangePasswordDialog } from "@/features/auth/change-password"
-import { createClient } from "@/lib/supabase/server"
+import { getDashboardViewer } from "@/features/navigation/queries/get-dashboard-viewer"
+import { redirect } from "next/navigation"
 
 export default async function DashboardLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const viewer = await getDashboardViewer()
 
-  let mustChangePassword = false
-
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("must_change_password")
-      .eq("id", user.id)
-      .maybeSingle()
-
-    mustChangePassword = Boolean(profile?.must_change_password)
+  if (!viewer) {
+    redirect("/login")
   }
 
   return (
     <SidebarProvider className="h-svh overflow-hidden">
-      <AppSidebar />
+      <AppSidebar viewer={viewer} />
       <SidebarInset className="min-h-0 overflow-hidden">
         <DashboardHeader />
         <main
@@ -36,7 +26,7 @@ export default async function DashboardLayout({
           {children}
         </main>
       </SidebarInset>
-      <MustChangePasswordDialog initialOpen={mustChangePassword} />
+      <MustChangePasswordDialog initialOpen={viewer.mustChangePassword} />
     </SidebarProvider>
   )
 }

@@ -81,29 +81,27 @@ flowchart LR
       phn_annual --> B2((B))
     end
 
-    subgraph PHIS["PHIS Coordinator"]
-      direction TB
-      phis_dash[Data Quality Check Review Dashboard]
-      phis_dash --> phis_start[Start Auto-Data Quality Check]
-      phis_start --> phis_gate{Data Quality Check Passed?}
-
-      phis_gate -->|No| phis_return[/Data Quality Check: Returned/]
-      phis_return --> phis_discrepancy[Send Discrepancy Report for Correction]
-      phis_discrepancy --> phn_review
-
-      phis_gate -->|Yes| phis_approved[/Data Quality Check: Approved/]
-      phis_approved --> phis_export[Export Reports in Excel or PDF Format]
-      phis_export --> phis_reports[[Reports in Excel or PDF Format]]
-      phis_reports --> phis_submit[Submit Reports to Provincial Health Office via same DOH Excel-Based E-Tools]
-    end
-
     subgraph CHO["City Health Officer"]
       direction TB
+      cho_dqc_dash[Data Quality Check Review Dashboard]
+      cho_dqc_dash --> cho_dqc_start[Start Auto-Data Quality Check]
+      cho_dqc_start --> cho_dqc_gate{Data Quality Check Passed?}
+
+      cho_dqc_gate -->|No| cho_dqc_return[/Data Quality Check: Returned/]
+      cho_dqc_return --> cho_discrepancy[Send Discrepancy Report for Correction]
+      cho_discrepancy --> phn_review
+
+      cho_dqc_gate -->|Yes| cho_dqc_approved[/Data Quality Check: Approved/]
+      cho_dqc_approved --> cho_export[Export Reports in Excel or PDF Format]
+      cho_export --> cho_reports[[Reports in Excel or PDF Format]]
+      cho_reports --> cho_submit[Submit Reports via DOH Excel-Based E-Tools]
+
       cho_start((A)) --> cho_surveillance[Real-Time Surveillance Dashboard]
       cho_surveillance --> cho_realtime[/Real-Time Health Records with Status/]
       cho_realtime --> cho_map[Map Records and Cases]
       cho_map --> cho_gis[/GIS Map and Predictive Analytics/]
       cho_gis --> cho_end([End])
+      cho_submit --> cho_end
     end
   end
 
@@ -118,10 +116,8 @@ flowchart LR
 
   rhm_submit --> phn_dash
 
-  B1 --> phis_dash
-  B2 --> phis_dash
-
-  phis_submit --> cho_end
+  B1 --> cho_dqc_dash
+  B2 --> cho_dqc_dash
 
   %% ============================
   %% Optional visual classes (to mimic original color semantics)
@@ -134,10 +130,10 @@ flowchart LR
   classDef table fill:#e7d9f7,stroke:#8b6bb8,color:#222;
   classDef input fill:#ffe3b5,stroke:#c98a1f,color:#222;
 
-  class rhm_validate,phn_approve_tbl,phn_all_ok,bhw_internet,phis_gate decision;
-  class rhm_return,phn_tbl_return,phis_return statusReturn;
-  class rhm_validated,phn_tbl_approved,phis_approved statusApprove;
-  class bhw_profiles,rhm_target_lists,phis_reports generated;
+  class rhm_validate,phn_approve_tbl,phn_all_ok,bhw_internet,cho_dqc_gate decision;
+  class rhm_return,phn_tbl_return,cho_dqc_return statusReturn;
+  class rhm_validated,phn_tbl_approved,cho_dqc_approved statusApprove;
+  class bhw_profiles,rhm_target_lists,cho_reports generated;
   class rhm_master,rhm_summary_auto,pat_itr,phn_tables,phn_monthly,phn_annual,cho_realtime,cho_gis table;
   class bhw_capture input;
 ```

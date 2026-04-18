@@ -26,7 +26,7 @@ Project LINK is a monorepo health-station management platform for CHO II Dasmari
 | `public.profiles` | 1-to-1 with `auth.users`. Stores role, status, assignment, and display fields. |
 | `public.health_stations` | Stub table. Holds the 5 active BHS stations. Used for station-scoped role assignment. |
 
-**Enums:** `user_role` (`bhw`, `rhm`, `phn`, `phis`, `cho`, `system_admin`), `user_status` (`active`, `inactive`, `invited`, `suspended`).
+**Enums:** `user_role` (`bhw`, `rhm`, `phn`, `cho`, `system_admin`), `user_status` (`active`, `inactive`, `invited`, `suspended`).
 
 **RLS:** Enabled on both `profiles` and `health_stations`.
 - `system_admin` — full access to all profiles.
@@ -64,7 +64,6 @@ Role home map:
 |---|---|
 | `system_admin` | `/admin/users` |
 | `cho` | `/dashboard` |
-| `phis` | `/dashboard` |
 | `phn` | `/dashboard` |
 | `rhm` | `/dashboard` |
 | `bhw` | `/bhw` |
