@@ -20,31 +20,45 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import type { CityBarangayRegistryRecord } from '../data/schema'
-import { scopeOptions, validityOptions } from '../data/options'
-import { getRegistryColumns } from './registry-columns'
-import { RegistryMobileCards } from './registry-mobile-cards'
+import type {
+  CoveragePlannerRecord,
+  CoverageStagedAction,
+} from '../../data/coverage-schema'
+import { coverageScopeOptions, stagedActionOptions } from '../../data/coverage-options'
+import { getCoverageColumns } from './coverage-columns'
+import { CoverageMobileCards } from './coverage-mobile-cards'
+import { CoverageBulkActions } from './coverage-bulk-actions'
 
-type RegistryTableProps = {
-  data: CityBarangayRegistryRecord[]
+type CoverageTableProps = {
+  data: CoveragePlannerRecord[]
   selectedPcode: string | null
-  onSelect: (record: CityBarangayRegistryRecord) => void
-  onOpenHistory: (record: CityBarangayRegistryRecord) => void
+  onSelect: (record: CoveragePlannerRecord) => void
+  onStage: (record: CoveragePlannerRecord, action: CoverageStagedAction) => void
+  onStageSelected: (
+    records: CoveragePlannerRecord[],
+    action: CoverageStagedAction
+  ) => void
+  onUndo: (record: CoveragePlannerRecord) => void
+  onUndoSelected: (records: CoveragePlannerRecord[]) => void
 }
 
-export function RegistryTable({
+export function CoverageTable({
   data,
   selectedPcode,
   onSelect,
-  onOpenHistory,
-}: RegistryTableProps) {
+  onStage,
+  onStageSelected,
+  onUndo,
+  onUndoSelected,
+}: CoverageTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
+  const [rowSelection, setRowSelection] = useState({})
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
 
   const columns = useMemo(
-    () => getRegistryColumns({ onSelect, onOpenHistory }),
-    [onOpenHistory, onSelect]
+    () => getCoverageColumns({ onSelect, onStage, onUndo }),
+    [onSelect, onStage, onUndo]
   )
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -53,10 +67,13 @@ export function RegistryTable({
     columns,
     state: {
       sorting,
+      rowSelection,
       columnFilters,
       globalFilter,
     },
+    enableRowSelection: true,
     onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
@@ -70,10 +87,8 @@ export function RegistryTable({
         pageSize: 10,
       },
       columnVisibility: {
-        city: false,
-        sourceFid: false,
+        sourceDate: false,
         sourceValidOn: false,
-        validity: false,
       },
     },
     globalFilterFn: (row, _columnId, value) => {
@@ -81,12 +96,7 @@ export function RegistryTable({
       if (!query) return true
 
       const record = row.original
-      const haystack = [
-        record.name,
-        record.pcode,
-        record.city,
-        record.sourceFid.toString(),
-      ]
+      const haystack = [record.name, record.pcode, record.city]
 
       return haystack.some((entry) => entry.toLowerCase().includes(query))
     },
@@ -98,17 +108,17 @@ export function RegistryTable({
         table={table}
         filters={[
           {
-            columnId: 'scope',
-            title: 'CHO II Coverage',
-            options: scopeOptions,
+            columnId: 'currentScope',
+            title: 'Current Scope',
+            options: coverageScopeOptions,
           },
           {
-            columnId: 'validity',
-            title: 'Validity Window',
-            options: validityOptions,
+            columnId: 'staged',
+            title: 'Status',
+            options: stagedActionOptions,
           },
         ]}
-        searchPlaceholder='Search by barangay, PSGC code, city, or source record ID...'
+        searchPlaceholder='Search barangay, PSGC, or city...'
       />
 
       <div className='hidden overflow-hidden rounded-md border md:block'>
@@ -150,7 +160,7 @@ export function RegistryTable({
             ) : (
               <TableRow>
                 <TableCell className='h-24 text-center' colSpan={columns.length}>
-                  No barangay records found.
+                  No barangays found.
                 </TableCell>
               </TableRow>
             )}
@@ -159,15 +169,23 @@ export function RegistryTable({
       </div>
 
       <div className='md:hidden'>
-        <RegistryMobileCards
-          onOpenHistory={onOpenHistory}
+        <CoverageMobileCards
           onSelect={onSelect}
+          onStage={onStage}
+          onUndo={onUndo}
           rows={table.getRowModel().rows}
           selectedPcode={selectedPcode}
         />
       </div>
 
       <DataTablePagination table={table} />
+
+      <CoverageBulkActions
+        onStageSelected={onStageSelected}
+        onUndoSelected={onUndoSelected}
+        table={table}
+      />
     </section>
   )
 }
+

@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge'
-import { formatScope } from '../data/formatters'
+import { formatScope } from '../../data/formatters'
 
 type ScopeBadgeProps = {
   inCho2Scope: boolean

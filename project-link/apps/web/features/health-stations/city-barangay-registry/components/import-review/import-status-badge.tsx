@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge'
-import { formatImportAction } from '../data/formatters'
-import type { CityBarangayImportAction } from '../data/schema'
+import { formatImportAction } from '../../data/formatters'
+import type { CityBarangayImportAction } from '../../data/schema'
 
 type ImportStatusBadgeProps = {
   action: CityBarangayImportAction

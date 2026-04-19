@@ -23,8 +23,8 @@ import {
 import type {
   CityBarangayImportAction,
   CityBarangayImportItem,
-} from '../data/schema'
-import { importActionOptions } from '../data/options'
+} from '../../data/schema'
+import { importActionOptions } from '../../data/options'
 import { getImportReviewColumns } from './import-review-columns'
 import { ImportReviewMobileCards } from './import-review-mobile-cards'
 

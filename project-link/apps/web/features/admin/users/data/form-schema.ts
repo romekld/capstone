@@ -11,13 +11,12 @@ export const DEFAULT_CITY_MUNICIPALITY = DEFAULT_CITY_MUNICIPALITY_NAME
 export const DEFAULT_PROVINCE = DEFAULT_PROVINCE_NAME
 export const DEFAULT_TEMP_PASSWORD = 'projectlink@cho2'
 
-export const ROLE_REQUIRES_STATION: UserRole[] = ['bhw', 'midwife_rhm']
+export const ROLE_REQUIRES_STATION: UserRole[] = ['bhw', 'rhm']
 
 export const CITY_WIDE_ROLES: UserRole[] = [
-  'nurse_phn',
-  'dso',
-  'phis_coordinator',
-  'city_health_officer',
+  'phn',
+  'phis',
+  'cho',
   'system_admin',
 ]
 
@@ -93,11 +92,10 @@ const baseSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   role: z.enum([
     'bhw',
-    'midwife_rhm',
-    'nurse_phn',
-    'dso',
-    'phis_coordinator',
-    'city_health_officer',
+    'rhm',
+    'phn',
+    'phis',
+    'cho',
     'system_admin',
   ]),
   healthStationId: z.string().optional(),
@@ -250,11 +248,11 @@ export function deriveSoftWarnings(values: Partial<UserFormValues>) {
     warnings.push('BHW accounts should include a purok assignment for clearer field ownership.')
   }
 
-  if (values.role === 'midwife_rhm' && !values.healthStationId) {
+  if (values.role === 'rhm' && !values.healthStationId) {
     warnings.push('Midwife/RHM accounts normally require a health station assignment.')
   }
 
-  if (values.role === 'nurse_phn' && values.healthStationId) {
+  if (values.role === 'phn' && values.healthStationId) {
     warnings.push('PHN is typically city-wide. Confirm this station assignment is intentional.')
   }
 
@@ -266,7 +264,7 @@ export function deriveSoftWarnings(values: Partial<UserFormValues>) {
     warnings.push('Inactive users flagged for password change will still be blocked until reactivated.')
   }
 
-  if ((values.role === 'bhw' || values.role === 'midwife_rhm') && !values.mobileNumber?.trim()) {
+  if ((values.role === 'bhw' || values.role === 'rhm') && !values.mobileNumber?.trim()) {
     warnings.push('This role is field-heavy; adding a mobile number improves operational reachability.')
   }
 

@@ -1,7 +1,7 @@
 # Project LINK — Architecture
 
 > Present-tense description of the system as it exists today.
-> Last updated: 2026-04-12
+> Last updated: 2026-04-20
 
 ---
 
@@ -9,7 +9,7 @@
 
 Project LINK is a monorepo health-station management platform for CHO II Dasmariñas. The production stack is:
 
-- **`apps/web`** — Next.js 16 App Router (internal dashboard + BHW PWA)
+- **`apps/web`** — Next.js 16 App Router (internal dashboard, BHW PWA, GIS workspace)
 - **`apps/api`** — FastAPI scaffold (health-domain logic, deferred to later phases)
 - **`packages/supabase`** — Supabase CLI config and migrations
 - **Supabase cloud** (`wxtyrjpicjqjgwxrwdmp`) — Postgres, Auth, RLS, Storage
@@ -26,7 +26,7 @@ Project LINK is a monorepo health-station management platform for CHO II Dasmari
 | `public.profiles` | 1-to-1 with `auth.users`. Stores role, status, assignment, and display fields. |
 | `public.health_stations` | Stub table. Holds the 5 active BHS stations. Used for station-scoped role assignment. |
 
-**Enums:** `user_role` (`bhw`, `rhm`, `phn`, `cho`, `system_admin`), `user_status` (`active`, `inactive`, `invited`, `suspended`).
+**Enums:** `user_role` (`bhw`, `rhm`, `phn`, `phis`, `cho`, `system_admin`), `user_status` (`active`, `inactive`, `invited`, `suspended`).
 
 **RLS:** Enabled on both `profiles` and `health_stations`.
 - `system_admin` — full access to all profiles.
@@ -114,14 +114,40 @@ Page (Server Component)
 
 ---
 
-### 6. Rendering Pattern
+### 6. Barangay GIS Workspace (`/admin/health-stations/city-barangays`)
+
+The web app includes a frontend-first Barangay GIS workspace for system administrators. It uses the real GIS reference files in `docs/gis/` to render the current master barangay registry and CHO2 operational coverage context before the backend GIS schema is migrated.
+
+**Data flow:**
+
+```text
+docs/gis/dasmarinas_boundaries.geojson
+docs/gis/cho2_boundaries.geojson
+  -> getCityBarangayRegistryData()  (Server Component read + DTO shaping)
+  -> RegistryPageShell              (Client workspace state)
+     -> Registry mode               (canonical boundary inspection + import review UI)
+     -> Coverage Planner            (staged add/remove CHO2 scope workflow)
+     -> shared GIS map shell        (MapLibre + theme-aware CARTO/MapTiler styles)
+```
+
+**Key boundaries:**
+
+- `city_barangays` remains the future source of truth for canonical city geometry.
+- `barangays` remains the future source of truth for CHO2 operational scope.
+- Registry mode shows coverage context but does not edit operational scope.
+- Coverage Planner stages add/remove scope changes and requires a batch reason before apply.
+- The shared map foundation lives in `features/gis-map/`; registry and coverage behavior stays in the barangay feature.
+
+---
+
+### 7. Rendering Pattern
 
 The codebase uses the Next.js 16 **async Server Component → Client Component props** pattern throughout:
 
 - **Pages** are `async` Server Components. They call query functions and pass data as props.
 - **Feature components** (e.g. `AdminUsersPage`, `AddUserPage`) are Client Components tagged `"use client"` that receive pre-fetched data.
 - **Server Actions** handle all mutations. Client Components call them via `useTransition` or `useActionState`.
-- No client-side data fetching (no `useEffect` + fetch, no SWR/React Query) in the current implementation.
+- No client-side data fetching (no `useEffect` + fetch, no SWR/React Query) in the current implementation. Browser-only UI such as MapLibre is isolated behind Client Components.
 
 ---
 
@@ -134,6 +160,8 @@ The codebase uses the Next.js 16 **async Server Component → Client Component p
 | `get_my_role()` SECURITY DEFINER | Prevents infinite RLS recursion when policies themselves need to read `profiles.role`. |
 | `must_change_password` enforced in middleware | Covers all routes without requiring per-page logic; ensures no page is reachable on a stale password. |
 | Health station slug→UUID resolution in Server Actions | The form schema uses human-readable slugs; the DB stores UUIDs. Resolution happens server-side so slugs never leak into DB writes. |
+| Registry and Coverage Planner share one GIS workspace | The map and selection model are shared, but geometry ownership and operational coverage ownership stay separate for auditability. |
+| Shared map code lives under `features/gis-map` | MapLibre style switching, layer rehydration, and popup shell behavior are reusable across Registry, Coverage Planner, BHS Management, and future pins. |
 
 ---
 
@@ -153,6 +181,7 @@ The codebase uses the Next.js 16 **async Server Component → Client Component p
 
 - FastAPI (`apps/api`) — scaffold only, no domain logic wired.
 - Health data modules (ITR, TCL, ST, MCT) — deferred to Phase 3+.
-- GIS / ML surfaces — deferred.
+- Backend GIS tables/RPCs - reference migrations exist, but current GIS workspace uses local GeoJSON DTOs until migrations are adapted.
+- ML / predictive analytics - deferred.
 - PWA service worker / offline sync — scaffolded direction only.
 - Non-admin role dashboards (`/dashboard`, `/bhw`) — shells only.

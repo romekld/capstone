@@ -17,8 +17,8 @@ import type {
   CityBarangayImportAction,
   CityBarangayImportItem,
   CityBarangayImportJob,
-} from '../data/schema'
-import { formatImportStatus } from '../data/formatters'
+} from '../../data/schema'
+import { formatImportStatus } from '../../data/formatters'
 import { ImportReviewTable } from './import-review-table'
 import { ImportCommitDialog } from './import-commit-dialog'
 

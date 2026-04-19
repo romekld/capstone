@@ -4,9 +4,9 @@ import type { Row } from '@tanstack/react-table'
 import { EyeIcon, HistoryIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
-import type { CityBarangayRegistryRecord } from '../data/schema'
-import { formatArea, formatDate } from '../data/formatters'
-import { ScopeBadge } from './scope-badge'
+import type { CityBarangayRegistryRecord } from '../../data/schema'
+import { formatArea, formatDate } from '../../data/formatters'
+import { ScopeBadge } from '../shared/scope-badge'
 
 type RegistryMobileCardsProps = {
   rows: Row<CityBarangayRegistryRecord>[]

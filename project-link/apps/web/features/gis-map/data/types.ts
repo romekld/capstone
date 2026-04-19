@@ -33,7 +33,8 @@ export type GisPolygonFeatureProperties = {
   name: string
   pcode: string
   inCho2Scope: boolean
-  [key: string]: string | number | boolean | null
+  stagedAction?: string | null
+  [key: string]: string | number | boolean | null | undefined
 }
 
 export type GisPolygonFeature = {

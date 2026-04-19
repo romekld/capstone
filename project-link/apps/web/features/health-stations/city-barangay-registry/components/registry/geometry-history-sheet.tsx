@@ -12,8 +12,8 @@ import { Separator } from '@/components/ui/separator'
 import type {
   CityBarangayGeometryVersion,
   CityBarangayRegistryRecord,
-} from '../data/schema'
-import { formatDate } from '../data/formatters'
+} from '../../data/schema'
+import { formatDate } from '../../data/formatters'
 
 type GeometryHistorySheetProps = {
   open: boolean

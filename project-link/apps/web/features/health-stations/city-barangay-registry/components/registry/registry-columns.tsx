@@ -4,9 +4,9 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { EyeIcon, HistoryIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DataTableColumnHeader } from '@/components/data-table'
-import type { CityBarangayRegistryRecord } from '../data/schema'
-import { formatArea, formatDate } from '../data/formatters'
-import { ScopeBadge } from './scope-badge'
+import type { CityBarangayRegistryRecord } from '../../data/schema'
+import { formatArea, formatDate } from '../../data/formatters'
+import { ScopeBadge } from '../shared/scope-badge'
 
 type RegistryColumnsConfig = {
   onSelect: (record: CityBarangayRegistryRecord) => void

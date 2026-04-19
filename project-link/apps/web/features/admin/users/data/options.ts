@@ -3,10 +3,10 @@ import type { UserRole, UserStatus } from './schema'
 
 export const roleOptions: { label: string; value: UserRole }[] = [
   { label: 'Barangay Health Worker (BHW)', value: 'bhw' },
-  { label: 'Rural Health Midwife (RHM)', value: 'midwife_rhm' },
-  { label: 'Public Health Nurse (PHN)', value: 'nurse_phn' },
-  { label: 'PHIS Coordinator', value: 'phis_coordinator' },
-  { label: 'City Health Officer', value: 'city_health_officer' },
+  { label: 'Rural Health Midwife (RHM)', value: 'rhm' },
+  { label: 'Public Health Nurse (PHN)', value: 'phn' },
+  { label: 'PHIS Coordinator', value: 'phis' },
+  { label: 'City Health Officer', value: 'cho' },
   { label: 'System Admin', value: 'system_admin' },
 ]
 

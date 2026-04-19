@@ -7,7 +7,7 @@ import { DataTableColumnHeader } from '@/components/data-table'
 import type {
   CityBarangayImportAction,
   CityBarangayImportItem,
-} from '../data/schema'
+} from '../../data/schema'
 import { ImportStatusBadge } from './import-status-badge'
 
 type ImportReviewColumnsConfig = {

@@ -6,9 +6,9 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import type { CityBarangayRegistryRecord } from '../data/schema'
-import { formatArea, formatDate } from '../data/formatters'
-import { ScopeBadge } from './scope-badge'
+import type { CityBarangayRegistryRecord } from '../../data/schema'
+import { formatArea, formatDate } from '../../data/formatters'
+import { ScopeBadge } from '../shared/scope-badge'
 
 type SelectedBarangayCardProps = {
   record: CityBarangayRegistryRecord | null

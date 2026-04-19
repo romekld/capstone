@@ -5,6 +5,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] - 2026-04-20
+
+### Added
+- **Barangay GIS Workspace** - added a map-first admin workspace for city barangay registry inspection, GeoJSON import review scaffolding, and CHO2 Coverage Planner staging.
+- **Shared GIS map foundation** - added reusable MapLibre shell, popup, layer, and style helpers under `features/gis-map`, with light/dark basemap behavior tied to the app theme.
+- **Coverage Planner UI** - added staged add/remove workflow, batch reason review, reset/apply controls, map/table sync, and coverage summary panels.
+
+### Changed
+- **Health Stations navigation** - consolidated city barangay registry and coverage planning into the `Barangays` workspace instead of separate sidebar entries.
+- **GIS data shaping** - derives registry and coverage context from `docs/gis/dasmarinas_boundaries.geojson` and `docs/gis/cho2_boundaries.geojson` for the frontend-first phase.
+- **Admin user role slugs** - aligned user-management forms and mock data with active role codes (`rhm`, `phn`, `phis`, `cho`).
+
+### Fixed
+- **Map interaction polish** - barangay polygons now use theme-aware boundary colors, hover/selected/staged styling, and popup-based metadata instead of a permanent overlay.
+- **GIS workspace layout** - made the left summary rail compact/sticky and moved title, tabs, and workspace actions into the main toolbar.
+
+---
 ## [Unreleased] — 2026-04-12
 
 ### Added

@@ -45,23 +45,19 @@ const roleAccessNotes: Record<string, string[]> = {
     'Records community visits and household-level data.',
     'Keep the purok assignment up to date.',
   ],
-  midwife_rhm: [
+  rhm: [
     'Reviews TCL records and oversees maternal workflows.',
     'A station assignment is required for this role.',
   ],
-  nurse_phn: [
+  phn: [
     'Coordinates reviews and escalations across stations.',
     'Usually set up as city-wide.',
   ],
-  dso: [
-    'Supports disease surveillance and response workflows.',
-    'Can view epidemiologic records and disease alerts.',
-  ],
-  phis_coordinator: [
+  phis: [
     'Handles MCT consolidation, DQC, and exports.',
     'This role is city-wide and report-focused.',
   ],
-  city_health_officer: [
+  cho: [
     'Read-only access to city-wide dashboards and alerts.',
     'Used for oversight and decision-making.',
   ],

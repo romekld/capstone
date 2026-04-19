@@ -36,17 +36,10 @@ export const adminNavSections = [
         children: [
           {
             id: "admin-health-stations-city-barangays",
-            title: "City Barangays",
+            title: "Barangays",
             href: "/admin/health-stations/city-barangays",
             icon: MapIcon,
             match: ["/admin/health-stations/city-barangays"],
-          },
-          {
-            id: "admin-health-stations-coverage-planner",
-            title: "Coverage Planner",
-            href: "/admin/health-stations/coverage-planner",
-            icon: MapIcon,
-            match: ["/admin/health-stations/coverage-planner"],
           },
           {
             id: "admin-health-stations-manage-bhs",

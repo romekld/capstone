@@ -89,12 +89,20 @@ export function ensureGisLayers(
         paint: {
           'fill-color': [
             'case',
+            ['==', ['get', 'stagedAction'], 'add'],
+            colors.stagedAddFill,
+            ['==', ['get', 'stagedAction'], 'remove'],
+            colors.stagedRemoveFill,
             ['==', ['get', 'inCho2Scope'], true],
             colors.inScopeFill,
             colors.outsideFill,
           ],
           'fill-opacity': [
             'case',
+            ['==', ['get', 'stagedAction'], 'add'],
+            colors.stagedFillOpacity,
+            ['==', ['get', 'stagedAction'], 'remove'],
+            colors.stagedFillOpacity,
             ['==', ['get', 'inCho2Scope'], true],
             colors.inScopeFillOpacity,
             colors.outsideFillOpacity,
@@ -130,6 +138,10 @@ export function ensureGisLayers(
         paint: {
           'line-color': [
             'case',
+            ['==', ['get', 'stagedAction'], 'add'],
+            colors.stagedAddLine,
+            ['==', ['get', 'stagedAction'], 'remove'],
+            colors.stagedRemoveLine,
             ['==', ['get', 'inCho2Scope'], true],
             colors.inScopeLine,
             colors.outsideLine,
@@ -243,6 +255,11 @@ function getBoundaryColors(mode: GisMapStyleMode) {
       hoverLine: '#bfdbfe',
       hoverLineOpacity: 0.95,
       selectedLine: '#3b82f6',
+      stagedAddFill: '#60a5fa',
+      stagedRemoveFill: '#f59e0b',
+      stagedAddLine: '#bfdbfe',
+      stagedRemoveLine: '#fcd34d',
+      stagedFillOpacity: 0.32,
     }
   }
 
@@ -259,6 +276,11 @@ function getBoundaryColors(mode: GisMapStyleMode) {
     hoverLine: '#0f5cff',
     hoverLineOpacity: 0.85,
     selectedLine: '#2563eb',
+    stagedAddFill: '#2563eb',
+    stagedRemoveFill: '#f59e0b',
+    stagedAddLine: '#1d4ed8',
+    stagedRemoveLine: '#b45309',
+    stagedFillOpacity: 0.24,
   }
 }
 

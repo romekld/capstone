@@ -37,11 +37,10 @@ const stations = [
 
 const roles: UserRole[] = [
   'bhw',
-  'midwife_rhm',
-  'nurse_phn',
-  'dso',
-  'phis_coordinator',
-  'city_health_officer',
+  'rhm',
+  'phn',
+  'phis',
+  'cho',
   'system_admin',
 ]
 
@@ -53,10 +52,9 @@ function toSlug(value: string) {
 
 function shouldUseCityWide(role: UserRole) {
   return [
-    'nurse_phn',
-    'dso',
-    'phis_coordinator',
-    'city_health_officer',
+    'phn',
+    'phis',
+    'cho',
     'system_admin',
   ].includes(role)
 }

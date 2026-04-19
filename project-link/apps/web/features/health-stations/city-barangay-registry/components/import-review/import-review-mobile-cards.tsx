@@ -7,7 +7,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/u
 import type {
   CityBarangayImportAction,
   CityBarangayImportItem,
-} from '../data/schema'
+} from '../../data/schema'
 import { ImportStatusBadge } from './import-status-badge'
 
 type ImportReviewMobileCardsProps = {

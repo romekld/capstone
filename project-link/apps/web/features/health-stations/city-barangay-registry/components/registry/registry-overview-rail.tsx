@@ -9,8 +9,8 @@ import { Progress } from '@/components/ui/progress'
 import type {
   CityBarangayRegistryRecord,
   CityBarangayRegistryStats,
-} from '../data/schema'
-import { formatArea, formatCompactNumber, formatDate } from '../data/formatters'
+} from '../../data/schema'
+import { formatArea, formatCompactNumber, formatDate } from '../../data/formatters'
 import { SelectedBarangayCard } from './selected-barangay-card'
 
 type RegistryOverviewRailProps = {
