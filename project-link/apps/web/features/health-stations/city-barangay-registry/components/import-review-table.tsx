@@ -99,11 +99,11 @@ export function ImportReviewTable({
         filters={[
           {
             columnId: 'action',
-            title: 'Status',
+            title: 'Review Status',
             options: importActionOptions,
           },
         ]}
-        searchPlaceholder='Search import row, PSGC, match, or error...'
+        searchPlaceholder='Search by row, PSGC code, matched barangay, or validation issue...'
       />
 
       <div className='hidden overflow-hidden rounded-md border md:block'>
@@ -141,7 +141,7 @@ export function ImportReviewTable({
             ) : (
               <TableRow>
                 <TableCell className='h-24 text-center' colSpan={columns.length}>
-                  No import rows found.
+                  No import rows match your current filters.
                 </TableCell>
               </TableRow>
             )}

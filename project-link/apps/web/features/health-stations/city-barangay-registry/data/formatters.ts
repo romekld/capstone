@@ -28,11 +28,11 @@ export function formatCompactNumber(value: number) {
 
 export function formatImportAction(action: CityBarangayImportAction) {
   const labels: Record<CityBarangayImportAction, string> = {
-    create: 'Ready to create',
-    review_required: 'Needs review',
-    overwrite: 'Will overwrite',
+    create: 'Ready to add',
+    review_required: 'Needs decision',
+    overwrite: 'Ready to replace',
     skip: 'Skipped',
-    invalid: 'Invalid geometry',
+    invalid: 'Invalid feature',
     committed: 'Committed',
   }
 
@@ -52,6 +52,6 @@ export function formatImportStatus(status: CityBarangayImportStatus) {
 }
 
 export function formatScope(inCho2Scope: boolean) {
-  return inCho2Scope ? 'In CHO2 scope' : 'Outside scope'
+  return inCho2Scope ? 'In scope' : 'Out of scope'
 }
 

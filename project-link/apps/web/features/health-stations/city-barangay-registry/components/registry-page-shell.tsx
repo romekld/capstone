@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { FolderInput, MapIcon, MapPinnedIcon, FileCheck } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type {
   CityBarangayImportItem,
@@ -50,6 +52,27 @@ export function RegistryPageShell({ data, mode }: RegistryPageShellProps) {
     )
   }, [data.geometryVersions, historyRecord])
 
+  const cityNames = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          data.records
+            .map((record) => record.city)
+            .filter((city): city is string => Boolean(city))
+        )
+      ),
+    [data.records]
+  )
+
+  const hasMultipleCities = cityNames.length > 1
+  const primaryCity = cityNames[0] ?? 'Selected city'
+  const pageTitle = hasMultipleCities
+    ? 'Barangays in Selected Cities'
+    : `Barangays in ${primaryCity}`
+  const pageDescription = hasMultipleCities
+    ? 'Official barangay boundary records and staged GeoJSON imports for the selected cities.'
+    : `Official barangay boundary records and staged GeoJSON imports for ${primaryCity}.`
+
   function handleSelectRecord(record: CityBarangayRegistryRecord) {
     setSelectedPcode(record.pcode)
     setActiveTab('registry')
@@ -70,16 +93,16 @@ export function RegistryPageShell({ data, mode }: RegistryPageShellProps) {
   }
 
   return (
-    <section className='flex min-h-0 flex-col gap-4 pb-8'>
-      <div className='grid min-h-0 gap-4 xl:grid-cols-[300px_minmax(0,1fr)]'>
+    <section className='min-h-0 xl:h-[calc(100svh-6rem)] xl:overflow-hidden'>
+      <div className='grid min-h-0 gap-4 xl:h-full xl:grid-cols-[300px_minmax(0,1fr)]'>
         <RegistryOverviewRail
-          mode={mode}
-          onShowImport={() => setActiveTab('import')}
+          cityName={primaryCity}
+          hasMultipleCities={hasMultipleCities}
           selectedRecord={selectedRecord}
           stats={data.stats}
         />
 
-        <div className='flex min-w-0 flex-col gap-4 pb-8'>
+        <div className='min-h-0 min-w-0 overflow-y-auto pb-4 pr-1'>
           <Tabs
             className='flex min-w-0 flex-col gap-4'
             onValueChange={(value) => {
@@ -89,16 +112,43 @@ export function RegistryPageShell({ data, mode }: RegistryPageShellProps) {
             }}
             value={activeTab}
           >
-            <div className='flex flex-wrap items-center justify-between gap-3'>
-              <TabsList>
-                <TabsTrigger value='registry'>Registry</TabsTrigger>
+            <div className='flex flex-wrap items-end justify-between gap-3'>
+              <div className='min-w-0'>
+                <h1 className='font-heading text-2xl font-bold tracking-tight'>
+                  {pageTitle}
+                </h1>
+                <p className='text-sm text-muted-foreground'>
+                  {pageDescription}
+                </p>
+              </div>
+              <div className='flex flex-wrap items-center gap-2'>
+                <TabsList>
+                  <TabsTrigger value='registry'>
+                    <MapIcon />
+                    Boundaries
+                  </TabsTrigger>
+                  {isAdmin ? (
+                    <TabsTrigger value='import'>
+                      <FileCheck />
+                      GeoJSON Review
+                    </TabsTrigger>
+                  ) : null}
+                </TabsList>
                 {isAdmin ? (
-                  <TabsTrigger value='import'>Import Review</TabsTrigger>
-                ) : null}
-              </TabsList>
+                  <Button onClick={() => setActiveTab('import')}>
+                    <FolderInput />
+                    Open Import Review
+                  </Button>
+                ) : (
+                  <Button disabled variant='outline'>
+                    <MapPinnedIcon />
+                    Read-only Access
+                  </Button>
+                )}
+              </div>
             </div>
 
-            <div className='h-[min(64svh,640px)] min-h-[520px]'>
+            <div className='h-[min(60svh,600px)] min-h-[500px]'>
               <RegistryMapPanel
                 onOpenHistory={setHistoryRecord}
                 onSelectPcode={handleSelectPcode}

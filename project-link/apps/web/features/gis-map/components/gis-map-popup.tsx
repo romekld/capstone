@@ -24,7 +24,7 @@ export function GisMapPopup({
     <div
       className={cn(
         'pointer-events-auto absolute z-10 w-[min(360px,calc(100vw-2rem))]',
-        'rounded-md bg-popover p-3 text-popover-foreground'
+        'rounded-lg bg-popover p-3 text-popover-foreground'
       )}
       style={{
         left: popup.point.x,

@@ -47,7 +47,7 @@ export function getRegistryColumns({
       id: 'scope',
       accessorFn: (row) => (row.inCho2Scope ? 'in_scope' : 'outside_scope'),
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='CHO2 Scope' />
+        <DataTableColumnHeader column={column} title='CHO II Coverage' />
       ),
       cell: ({ row }) => <ScopeBadge inCho2Scope={row.original.inCho2Scope} />,
       filterFn: (row, id, values) => {
@@ -68,7 +68,7 @@ export function getRegistryColumns({
     {
       accessorKey: 'sourceFid',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Source FID' />
+        <DataTableColumnHeader column={column} title='Source Record ID' />
       ),
       cell: ({ row }) => (
         <span className='font-mono text-xs tabular-nums'>
@@ -79,7 +79,7 @@ export function getRegistryColumns({
     {
       accessorKey: 'sourceDate',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Source Date' />
+        <DataTableColumnHeader column={column} title='Data Source Date' />
       ),
       cell: ({ row }) => formatDate(row.original.sourceDate),
       sortingFn: (rowA, rowB, id) =>
@@ -89,7 +89,7 @@ export function getRegistryColumns({
     {
       accessorKey: 'sourceValidOn',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Valid On' />
+        <DataTableColumnHeader column={column} title='Validity Start' />
       ),
       cell: ({ row }) => formatDate(row.original.sourceValidOn),
     },
@@ -97,7 +97,7 @@ export function getRegistryColumns({
       id: 'validity',
       accessorFn: (row) => (row.sourceValidTo ? 'has_valid_to' : 'current'),
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Valid To' />
+        <DataTableColumnHeader column={column} title='Validity End' />
       ),
       cell: ({ row }) => formatDate(row.original.sourceValidTo),
       filterFn: (row, id, values) => {
@@ -131,7 +131,7 @@ export function getRegistryColumns({
     {
       accessorKey: 'updatedAt',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Updated At' />
+        <DataTableColumnHeader column={column} title='Last Updated' />
       ),
       cell: ({ row }) => formatDate(row.original.updatedAt),
     },

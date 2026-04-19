@@ -26,7 +26,7 @@ export function getImportReviewColumns({
     {
       accessorKey: 'featureIndex',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Feature #' />
+        <DataTableColumnHeader column={column} title='Row #' />
       ),
       cell: ({ row }) => (
         <span className='font-mono text-xs tabular-nums'>
@@ -40,7 +40,7 @@ export function getImportReviewColumns({
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title='Barangay' />
       ),
-      cell: ({ row }) => row.original.name ?? 'Unnamed boundary',
+      cell: ({ row }) => row.original.name ?? 'Unnamed feature',
       enableHiding: false,
     },
     {
@@ -54,7 +54,7 @@ export function getImportReviewColumns({
             {row.original.pcode}
           </span>
         ) : (
-          <span className='text-muted-foreground'>Missing</span>
+          <span className='text-muted-foreground'>Missing code</span>
         ),
       enableHiding: false,
     },
@@ -76,7 +76,7 @@ export function getImportReviewColumns({
       id: 'errors',
       accessorFn: (row) => row.validationErrors.join(', '),
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Errors' />
+        <DataTableColumnHeader column={column} title='Validation Issues' />
       ),
       cell: ({ row }) =>
         row.original.validationErrors.length ? (
@@ -91,11 +91,11 @@ export function getImportReviewColumns({
     {
       accessorKey: 'existingBarangayName',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title='Existing Match' />
+        <DataTableColumnHeader column={column} title='Matched Barangay' />
       ),
       cell: ({ row }) =>
         row.original.existingBarangayName ?? (
-          <span className='text-muted-foreground'>No match</span>
+          <span className='text-muted-foreground'>No matched barangay</span>
         ),
       enableSorting: false,
     },
@@ -106,7 +106,7 @@ export function getImportReviewColumns({
         const item = row.original
 
         if (item.action === 'invalid' || item.action === 'create') {
-          return <span className='text-sm text-muted-foreground'>Automatic</span>
+          return <span className='text-sm text-muted-foreground'>System-set</span>
         }
 
         return (
@@ -117,7 +117,7 @@ export function getImportReviewColumns({
               variant={item.action === 'skip' ? 'default' : 'outline'}
             >
               <SkipForwardIcon data-icon='inline-start' />
-              Skip
+              Skip row
             </Button>
             <Button
               onClick={() => onSetAction(item, 'overwrite')}
@@ -125,7 +125,7 @@ export function getImportReviewColumns({
               variant={item.action === 'overwrite' ? 'default' : 'outline'}
             >
               <RotateCcwIcon data-icon='inline-start' />
-              Overwrite
+              Replace boundary
             </Button>
           </div>
         )

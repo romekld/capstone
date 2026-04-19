@@ -4,6 +4,7 @@ import type {
   Map as MapLibreMap,
 } from 'maplibre-gl'
 import type {
+  GisMapStyleMode,
   GisPolygonFeatureCollection,
   GisPreviewFeatureCollection,
 } from '../data/types'
@@ -64,9 +65,11 @@ export function ensureGisLayers(
   featureCollection: GisPolygonFeatureCollection,
   previewGeometry: GisGeometry | null,
   selectedId: string | null,
-  hoveredId: string | null
+  hoveredId: string | null,
+  mode: GisMapStyleMode
 ) {
   const beforeId = getFirstSymbolLayerId(map)
+  const colors = getBoundaryColors(mode)
 
   if (!map.getSource(GIS_BOUNDARY_SOURCE)) {
     map.addSource(GIS_BOUNDARY_SOURCE, {
@@ -87,14 +90,14 @@ export function ensureGisLayers(
           'fill-color': [
             'case',
             ['==', ['get', 'inCho2Scope'], true],
-            '#1f7a5b',
-            '#64748b',
+            colors.inScopeFill,
+            colors.outsideFill,
           ],
           'fill-opacity': [
             'case',
             ['==', ['get', 'inCho2Scope'], true],
-            0.28,
-            0.14,
+            colors.inScopeFillOpacity,
+            colors.outsideFillOpacity,
           ],
         },
       },
@@ -110,8 +113,8 @@ export function ensureGisLayers(
         source: GIS_BOUNDARY_SOURCE,
         filter: ['==', ['get', 'id'], hoveredId ?? ''],
         paint: {
-          'fill-color': '#0f5cff',
-          'fill-opacity': 0.2,
+          'fill-color': colors.hoverFill,
+          'fill-opacity': colors.hoverFillOpacity,
         },
       },
       beforeId
@@ -128,10 +131,10 @@ export function ensureGisLayers(
           'line-color': [
             'case',
             ['==', ['get', 'inCho2Scope'], true],
-            '#0f513e',
-            '#475569',
+            colors.inScopeLine,
+            colors.outsideLine,
           ],
-          'line-opacity': 0.95,
+          'line-opacity': colors.lineOpacity,
           'line-width': [
             'interpolate',
             ['linear'],
@@ -155,9 +158,9 @@ export function ensureGisLayers(
         source: GIS_BOUNDARY_SOURCE,
         filter: ['==', ['get', 'id'], hoveredId ?? ''],
         paint: {
-          'line-color': '#0f5cff',
+          'line-color': colors.hoverLine,
           'line-width': 3,
-          'line-opacity': 0.85,
+          'line-opacity': colors.hoverLineOpacity,
         },
       },
       beforeId
@@ -172,7 +175,7 @@ export function ensureGisLayers(
         source: GIS_BOUNDARY_SOURCE,
         filter: ['==', ['get', 'id'], selectedId ?? ''],
         paint: {
-          'line-color': '#2563eb',
+          'line-color': colors.selectedLine,
           'line-width': 4.5,
           'line-opacity': 0.95,
         },
@@ -223,6 +226,40 @@ export function ensureGisLayers(
 
   setHoveredBoundary(map, hoveredId)
   setSelectedBoundary(map, selectedId)
+}
+
+function getBoundaryColors(mode: GisMapStyleMode) {
+  if (mode === 'dark') {
+    return {
+      inScopeFill: '#34d399',
+      outsideFill: '#cbd5e1',
+      inScopeFillOpacity: 0.3,
+      outsideFillOpacity: 0.16,
+      inScopeLine: '#a7f3d0',
+      outsideLine: '#e2e8f0',
+      lineOpacity: 0.88,
+      hoverFill: '#60a5fa',
+      hoverFillOpacity: 0.24,
+      hoverLine: '#bfdbfe',
+      hoverLineOpacity: 0.95,
+      selectedLine: '#3b82f6',
+    }
+  }
+
+  return {
+    inScopeFill: '#1f7a5b',
+    outsideFill: '#64748b',
+    inScopeFillOpacity: 0.28,
+    outsideFillOpacity: 0.14,
+    inScopeLine: '#0f513e',
+    outsideLine: '#475569',
+    lineOpacity: 0.95,
+    hoverFill: '#0f5cff',
+    hoverFillOpacity: 0.2,
+    hoverLine: '#0f5cff',
+    hoverLineOpacity: 0.85,
+    selectedLine: '#2563eb',
+  }
 }
 
 function getFirstSymbolLayerId(map: MapLibreMap) {

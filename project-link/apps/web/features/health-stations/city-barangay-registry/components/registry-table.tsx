@@ -99,16 +99,16 @@ export function RegistryTable({
         filters={[
           {
             columnId: 'scope',
-            title: 'CHO2 Scope',
+            title: 'CHO II Coverage',
             options: scopeOptions,
           },
           {
             columnId: 'validity',
-            title: 'Validity',
+            title: 'Validity Window',
             options: validityOptions,
           },
         ]}
-        searchPlaceholder='Search barangay, PSGC, city, or source FID...'
+        searchPlaceholder='Search by barangay, PSGC code, city, or source record ID...'
       />
 
       <div className='hidden overflow-hidden rounded-md border md:block'>
@@ -150,7 +150,7 @@ export function RegistryTable({
             ) : (
               <TableRow>
                 <TableCell className='h-24 text-center' colSpan={columns.length}>
-                  No barangays found.
+                  No barangay records found.
                 </TableCell>
               </TableRow>
             )}

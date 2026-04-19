@@ -53,10 +53,10 @@ export function ImportReviewPanel({
 
   const summary = useMemo(
     () => [
-      { label: 'Total', value: job.totalFeatures },
-      { label: 'Valid', value: job.validFeatures },
-      { label: 'Invalid', value: invalidCount },
-      { label: 'Duplicates', value: job.duplicateFeatures },
+      { label: 'Total rows', value: job.totalFeatures },
+      { label: 'Valid rows', value: job.validFeatures },
+      { label: 'Invalid rows', value: invalidCount },
+      { label: 'Duplicate rows', value: job.duplicateFeatures },
     ],
     [invalidCount, job.duplicateFeatures, job.totalFeatures, job.validFeatures]
   )
@@ -99,40 +99,40 @@ export function ImportReviewPanel({
       <div className='grid gap-4 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]'>
         <Card>
           <CardHeader>
-            <CardTitle>GeoJSON Input</CardTitle>
+            <CardTitle>GeoJSON Intake</CardTitle>
             <CardDescription>
-              Upload or paste payloads before validating an import job.
+              Upload or paste GeoJSON before running validation.
             </CardDescription>
           </CardHeader>
           <CardContent className='flex flex-col gap-3'>
             <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
               <Button className='h-11' variant='outline'>
                 <UploadIcon data-icon='inline-start' />
-                Upload file
+                Upload GeoJSON
               </Button>
               <Button className='h-11' variant='outline'>
                 <FileJsonIcon data-icon='inline-start' />
-                Validate payload
+                Run validation
               </Button>
             </div>
             <Textarea
               className='min-h-32 resize-none'
-              placeholder='Paste GeoJSON FeatureCollection here for future validation.'
+              placeholder='Paste a GeoJSON FeatureCollection payload for validation.'
               readOnly
               value=''
             />
             <p className='text-xs text-muted-foreground'>
-              UI-first scaffold only. Backend validation will call the preserved
-              stage import workflow later.
+              UI scaffold only. Backend validation will be connected to the
+              staged import workflow.
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Import Summary</CardTitle>
+            <CardTitle>Import Job Summary</CardTitle>
             <CardDescription>
-              Current sample job: {job.filename} / {formatImportStatus(job.status)}
+              Current job: {job.filename} / {formatImportStatus(job.status)}
             </CardDescription>
           </CardHeader>
           <CardContent className='flex flex-col gap-4'>
@@ -151,7 +151,7 @@ export function ImportReviewPanel({
             </div>
             <div className='flex flex-col gap-2'>
               <div className='flex items-center justify-between gap-3 text-sm'>
-                <span className='text-muted-foreground'>Validation progress</span>
+                <span className='text-muted-foreground'>Validation completion</span>
                 <span className='font-mono tabular-nums'>{progressValue}%</span>
               </div>
               <Progress value={progressValue} />
@@ -162,7 +162,7 @@ export function ImportReviewPanel({
               onClick={() => setCommitOpen(true)}
             >
               <CheckCircle2Icon data-icon='inline-start' />
-              {committed ? 'Import committed' : 'Commit import'}
+              {committed ? 'Changes committed' : 'Commit validated changes'}
             </Button>
           </CardContent>
         </Card>
@@ -170,10 +170,10 @@ export function ImportReviewPanel({
 
       {!commitReady ? (
         <Alert variant={invalidCount > 0 ? 'destructive' : 'default'}>
-          <AlertTitle>Import cannot be committed yet</AlertTitle>
+          <AlertTitle>Commit is blocked</AlertTitle>
           <AlertDescription>
             Resolve {unresolvedCount} duplicate decision
-            {unresolvedCount === 1 ? '' : 's'} and review {invalidCount} invalid
+            {unresolvedCount === 1 ? '' : 's'} and fix {invalidCount} invalid
             feature{invalidCount === 1 ? '' : 's'} before commit.
           </AlertDescription>
         </Alert>

@@ -16,10 +16,10 @@ type SelectedBarangayCardProps = {
 
 export function SelectedBarangayCard({ record }: SelectedBarangayCardProps) {
   return (
-    <Card size='sm'>
+    <Card className='shadow-none' size='sm'>
       <CardHeader>
         <CardTitle>Selected Barangay</CardTitle>
-        <CardDescription>Compact active polygon summary.</CardDescription>
+        <CardDescription>Current boundary selected from the map or table.</CardDescription>
       </CardHeader>
       <CardContent>
         {record ? (
@@ -28,7 +28,7 @@ export function SelectedBarangayCard({ record }: SelectedBarangayCardProps) {
               <div className='min-w-0'>
                 <p className='font-medium'>{record.name}</p>
                 <p className='font-mono text-xs text-muted-foreground'>
-                  {record.pcode}
+                  {record.pcode} • {record.city}
                 </p>
               </div>
               <ScopeBadge inCho2Scope={record.inCho2Scope} />
@@ -36,18 +36,22 @@ export function SelectedBarangayCard({ record }: SelectedBarangayCardProps) {
 
             <Separator />
 
-            <dl className='grid gap-2 text-sm'>
-              <div className='flex items-center justify-between gap-3'>
-                <dt className='text-muted-foreground'>Source FID</dt>
-                <dd className='font-mono tabular-nums'>{record.sourceFid}</dd>
+            <dl className='grid gap-2 sm:grid-cols-2'>
+              <div className='py-1'>
+                <dt className='text-xs text-muted-foreground'>Source record ID</dt>
+                <dd className='mt-1 font-mono text-base font-medium tabular-nums leading-tight'>
+                  {record.sourceFid}
+                </dd>
               </div>
-              <div className='flex items-center justify-between gap-3'>
-                <dt className='text-muted-foreground'>Valid on</dt>
-                <dd>{formatDate(record.sourceValidOn)}</dd>
+              <div className='py-1'>
+                <dt className='text-xs text-muted-foreground'>Validity start</dt>
+                <dd className='mt-1 text-base font-medium leading-tight'>
+                  {formatDate(record.sourceValidOn)}
+                </dd>
               </div>
-              <div className='flex items-center justify-between gap-3'>
-                <dt className='text-muted-foreground'>Area</dt>
-                <dd className='font-mono tabular-nums'>
+              <div className='py-1 sm:col-span-2'>
+                <dt className='text-xs text-muted-foreground'>Area</dt>
+                <dd className='mt-1 font-mono text-base font-medium tabular-nums leading-tight'>
                   {formatArea(record.sourceAreaSqKm)}
                 </dd>
               </div>
@@ -55,8 +59,7 @@ export function SelectedBarangayCard({ record }: SelectedBarangayCardProps) {
           </div>
         ) : (
           <p className='text-sm text-muted-foreground'>
-            Select a barangay from the map or table to inspect its source
-            metadata.
+            Select a barangay from the map or table to view source metadata.
           </p>
         )}
       </CardContent>

@@ -25,9 +25,9 @@ export function RegistryMobileCards({
     return (
       <Empty className='rounded-md border'>
         <EmptyHeader>
-          <EmptyTitle>No barangays found</EmptyTitle>
+          <EmptyTitle>No barangay records found</EmptyTitle>
           <EmptyDescription>
-            Adjust the search or filters to review the registry.
+            Adjust the search or filters to review boundary records.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -61,11 +61,11 @@ export function RegistryMobileCards({
                 <dd>{record.city}</dd>
               </div>
               <div className='grid grid-cols-[92px_1fr] gap-2'>
-                <dt className='text-muted-foreground'>Source date</dt>
+                <dt className='text-muted-foreground'>Data source date</dt>
                 <dd>{formatDate(record.sourceDate)}</dd>
               </div>
               <div className='grid grid-cols-[92px_1fr] gap-2'>
-                <dt className='text-muted-foreground'>Valid on</dt>
+                <dt className='text-muted-foreground'>Validity start</dt>
                 <dd>{formatDate(record.sourceValidOn)}</dd>
               </div>
               <div className='grid grid-cols-[92px_1fr] gap-2'>
@@ -82,7 +82,7 @@ export function RegistryMobileCards({
                 variant='outline'
               >
                 <EyeIcon data-icon='inline-start' />
-                View
+                View on map
               </Button>
               <Button
                 className='h-11'
@@ -91,7 +91,7 @@ export function RegistryMobileCards({
                 variant='outline'
               >
                 <HistoryIcon data-icon='inline-start' />
-                History
+                Geometry history
               </Button>
             </div>
           </article>

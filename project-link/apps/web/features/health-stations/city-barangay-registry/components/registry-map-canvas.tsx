@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { HistoryIcon, MapPinIcon, XIcon } from 'lucide-react'
+import { BadgeCheck, HistoryIcon, XIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -15,7 +15,7 @@ import type {
   CityBarangayImportItem,
   CityBarangayRegistryRecord,
 } from '../data/schema'
-import { formatArea, formatDate } from '../data/formatters'
+import { formatArea, formatDate, formatScope } from '../data/formatters'
 import { toRegistryFeatureCollection } from '../data/geojson'
 
 type RegistryMapCanvasProps = {
@@ -100,10 +100,7 @@ function MapPopupContent({
       <div className='min-w-0'>
         <div className='flex items-start justify-between gap-3'>
           <div className='min-w-0'>
-            <div className='flex items-center gap-2'>
-              {/* <MapPinIcon className='text-muted-foreground' /> */}
-              <p className='truncate font-medium'>{record.name}</p>
-            </div>
+            <p className='truncate font-medium'>{record.name}</p>
             <p className='mt-1 font-mono text-xs text-muted-foreground'>
               {record.pcode}
             </p>
@@ -117,8 +114,9 @@ function MapPopupContent({
             <XIcon />
           </Button>
         </div>
-        <Badge className='mt-2 w-fit' variant={record.inCho2Scope ? 'default' : 'secondary'}>
-          {record.inCho2Scope ? 'In CHO2' : 'Outside CHO2'}
+        <Badge variant={record.inCho2Scope ? 'default' : 'outline'}>
+          {record.inCho2Scope ? <BadgeCheck data-icon='inline-start' /> : null}{' '}
+          {formatScope(record.inCho2Scope)}
         </Badge>
       </div>
 
@@ -126,11 +124,11 @@ function MapPopupContent({
 
       <dl className='grid grid-cols-3 gap-2 text-xs'>
         <div>
-          <dt className='text-muted-foreground'>Source date</dt>
+          <dt className='text-muted-foreground'>Data source date</dt>
           <dd className='font-medium'>{formatDate(record.sourceDate)}</dd>
         </div>
         <div>
-          <dt className='text-muted-foreground'>Valid on</dt>
+          <dt className='text-muted-foreground'>Validity start</dt>
           <dd className='font-medium'>{formatDate(record.sourceValidOn)}</dd>
         </div>
         <div>
@@ -141,7 +139,7 @@ function MapPopupContent({
 
       <Button className='w-full' onClick={onOpenHistory} variant='outline'>
         <HistoryIcon data-icon='inline-start' />
-        View history
+        View geometry history
       </Button>
     </div>
   )

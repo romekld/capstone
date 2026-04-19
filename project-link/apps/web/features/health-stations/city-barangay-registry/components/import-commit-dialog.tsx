@@ -28,21 +28,21 @@ export function ImportCommitDialog({
     <AlertDialog onOpenChange={onOpenChange} open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Commit staged import?</AlertDialogTitle>
+          <AlertDialogTitle>Commit validated changes?</AlertDialogTitle>
           <AlertDialogDescription>
             This is a UI scaffold for the preserved import workflow. In the
-            backend-backed version, this commit writes creates and explicit
-            overwrites to the city barangay registry and records geometry
+            backend-backed version, this commit writes new and replaced
+            boundaries to the city barangay registry and records geometry
             history.
             {overwriteCount > 0
-              ? ` ${overwriteCount} row${overwriteCount === 1 ? '' : 's'} will overwrite existing boundaries.`
+              ? ` ${overwriteCount} row${overwriteCount === 1 ? '' : 's'} will replace existing boundaries.`
               : ''}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm}>
-            Commit import
+            Commit changes
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

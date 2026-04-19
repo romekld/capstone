@@ -83,7 +83,8 @@ export function GisMapShell({
         featureCollection,
         previewGeometry,
         selectedId,
-        hoveredIdRef.current
+        hoveredIdRef.current,
+        mode
       )
       registerInteractionsOnce(
         map,
@@ -92,7 +93,7 @@ export function GisMapShell({
         polygonClickRef
       )
     },
-    [featureCollection, previewGeometry, selectedId]
+    [featureCollection, mode, previewGeometry, selectedId]
   )
 
   useEffect(() => {
@@ -178,9 +179,9 @@ export function GisMapShell({
     if (map.getSource('gis-boundaries')) {
       setBoundarySourceData(map, featureCollection)
     } else {
-      hydrateLayers(map)
+      hydrateLayersRef.current(map)
     }
-  }, [featureCollection, hydrateLayers])
+  }, [featureCollection])
 
   useEffect(() => {
     const map = mapRef.current

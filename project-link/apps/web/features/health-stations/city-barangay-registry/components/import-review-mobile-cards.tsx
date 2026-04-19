@@ -30,9 +30,9 @@ export function ImportReviewMobileCards({
     return (
       <Empty className='rounded-md border'>
         <EmptyHeader>
-          <EmptyTitle>No import rows found</EmptyTitle>
+          <EmptyTitle>No import rows match your filters</EmptyTitle>
           <EmptyDescription>
-            Adjust the status filter to review staged features.
+            Adjust the review status filter to inspect staged features.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -54,10 +54,10 @@ export function ImportReviewMobileCards({
             <div className='flex items-start justify-between gap-3'>
               <div className='min-w-0'>
                 <p className='font-medium'>
-                  {item.name ?? 'Unnamed boundary'}
+                  {item.name ?? 'Unnamed feature'}
                 </p>
                 <p className='font-mono text-xs text-muted-foreground'>
-                  Feature #{item.featureIndex}
+                  Row #{item.featureIndex}
                 </p>
               </div>
               <ImportStatusBadge action={item.action} />
@@ -67,12 +67,12 @@ export function ImportReviewMobileCards({
               <div className='grid grid-cols-[104px_1fr] gap-2'>
                 <dt className='text-muted-foreground'>PSGC</dt>
                 <dd className='font-mono text-xs'>
-                  {item.pcode ?? 'Missing'}
+                  {item.pcode ?? 'Missing code'}
                 </dd>
               </div>
               <div className='grid grid-cols-[104px_1fr] gap-2'>
-                <dt className='text-muted-foreground'>Match</dt>
-                <dd>{item.existingBarangayName ?? 'No match'}</dd>
+                <dt className='text-muted-foreground'>Matched barangay</dt>
+                <dd>{item.existingBarangayName ?? 'No matched barangay'}</dd>
               </div>
               <div className='grid grid-cols-[104px_1fr] gap-2'>
                 <dt className='text-muted-foreground'>Errors</dt>

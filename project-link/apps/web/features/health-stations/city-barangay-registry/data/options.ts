@@ -12,12 +12,12 @@ import type { CityBarangayImportAction } from './schema'
 
 export const scopeOptions = [
   {
-    label: 'In CHO2 scope',
+    label: 'In scope',
     value: 'in_scope',
     icon: CheckCircle2Icon,
   },
   {
-    label: 'Outside scope',
+    label: 'Out of scope',
     value: 'outside_scope',
     icon: CircleIcon,
   },
@@ -29,17 +29,17 @@ export const importActionOptions: {
   icon: React.ComponentType<{ className?: string }>
 }[] = [
   {
-    label: 'Ready to create',
+    label: 'Ready to add',
     value: 'create',
     icon: ClipboardCheckIcon,
   },
   {
-    label: 'Needs review',
+    label: 'Needs decision',
     value: 'review_required',
     icon: HistoryIcon,
   },
   {
-    label: 'Will overwrite',
+    label: 'Ready to replace',
     value: 'overwrite',
     icon: RotateCcwIcon,
   },
@@ -49,7 +49,7 @@ export const importActionOptions: {
     icon: CircleIcon,
   },
   {
-    label: 'Invalid geometry',
+    label: 'Invalid feature',
     value: 'invalid',
     icon: FileWarningIcon,
   },
@@ -62,12 +62,12 @@ export const importActionOptions: {
 
 export const validityOptions = [
   {
-    label: 'Current',
+    label: 'Current boundary',
     value: 'current',
     icon: CheckCircle2Icon,
   },
   {
-    label: 'Has valid-to date',
+    label: 'Has validity end date',
     value: 'has_valid_to',
     icon: AlertTriangleIcon,
   },
