@@ -6,6 +6,7 @@ import {
   Clock3,
   ImagePlus,
   Lock,
+  RefreshCw,
   Shield,
   Trash2,
   User,
@@ -20,10 +21,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { healthStationOptions, type AddUserValues } from '../../data/form-schema'
+import { type AddUserValues, type HealthStationOption } from '../../data/form-schema'
 
 type UserFormRightPanelProps = {
   values: Partial<AddUserValues>
+  stations: HealthStationOption[]
   roleOptionLabel?: string
   roleNotes: string[]
   mustChangePassword: boolean
@@ -35,10 +37,11 @@ type UserFormRightPanelProps = {
     passwordChangedAt?: string | null
   }
   photoPreviewUrl: string
-  photoFileName: string
+  hasCustomPhoto: boolean
   photoError: string
   photoInputRef: RefObject<HTMLInputElement | null>
   onChoosePhoto: () => void
+  onRerollAvatar: () => void
   onPhotoChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   onRemovePhoto: () => void
   toDisplayDate: (value?: string | null) => string
@@ -47,16 +50,18 @@ type UserFormRightPanelProps = {
 
 export function UserFormRightPanel({
   values,
+  stations,
   roleOptionLabel,
   roleNotes,
   mustChangePassword,
   isActive,
   activity,
   photoPreviewUrl,
-  photoFileName,
+  hasCustomPhoto,
   photoError,
   photoInputRef,
   onChoosePhoto,
+  onRerollAvatar,
   onPhotoChange,
   onRemovePhoto,
   toDisplayDate,
@@ -73,12 +78,27 @@ export function UserFormRightPanel({
           <CardContent className='flex flex-col gap-3'>
             <div className='rounded-xl border border-dashed p-4'>
               <div className='flex items-center gap-3'>
-                <Avatar className='size-16 rounded-xl'>
-                  <AvatarImage src={photoPreviewUrl || undefined} alt='Profile preview' />
-                  <AvatarFallback className='text-base'>
-                    {getInitials(values.firstName, values.lastName)}
-                  </AvatarFallback>
-                </Avatar>
+                <div className='group relative'>
+                  <Avatar className='size-16 rounded-xl'>
+                    <AvatarImage src={photoPreviewUrl || undefined} alt='Profile preview' />
+                    <AvatarFallback className='text-base'>
+                      {getInitials(values.firstName, values.lastName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {!hasCustomPhoto ? (
+                    <Button
+                      type='button'
+                      size='icon'
+                      variant='secondary'
+                      onClick={onRerollAvatar}
+                      className='absolute -right-2 -top-2 size-7 rounded-full border bg-background/90 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 focus-visible:opacity-100'
+                      aria-label='Reroll generated avatar'
+                      title='Reroll avatar'
+                    >
+                      <RefreshCw className='size-3.5' />
+                    </Button>
+                  ) : null}
+                </div>
                 <div>
                   <p className='font-medium'>
                     {values.firstName || values.lastName
@@ -86,9 +106,6 @@ export function UserFormRightPanel({
                       : 'New account'}
                   </p>
                   <p className='text-xs text-muted-foreground'>Max size: 2 MB. JPG, PNG, or WEBP.</p>
-                  {photoFileName ? (
-                    <p className='mt-1 text-xs text-muted-foreground'>{photoFileName}</p>
-                  ) : null}
                 </div>
               </div>
               <input
@@ -108,7 +125,7 @@ export function UserFormRightPanel({
                   variant='outline'
                   className='h-10 px-4 '
                   onClick={onRemovePhoto}
-                  disabled={!photoPreviewUrl}
+                  disabled={!hasCustomPhoto}
                 >
                   Remove
                   <Trash2 data-icon='inline-end' />
@@ -141,7 +158,7 @@ export function UserFormRightPanel({
               <span className='text-muted-foreground'>Scope</span>
               <span className='font-medium'>
                 {values.healthStationId
-                  ? healthStationOptions.find((item) => item.value === values.healthStationId)?.label
+                  ? stations.find((item) => item.id === values.healthStationId)?.name
                   : 'City-wide'}
               </span>
             </div>

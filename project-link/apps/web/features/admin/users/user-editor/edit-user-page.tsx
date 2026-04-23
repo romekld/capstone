@@ -1,60 +1,41 @@
 "use client"
 
-import Link from 'next/link'
-import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { UserForm } from './components/user-form'
-import { buildDefaultFormValues, type AddUserValues } from '../data/form-schema'
-import { createMockUsers } from '../data/users'
+import { buildDefaultFormValues, type AddUserValues, type HealthStationOption } from '../data/form-schema'
+import { updateUserAction } from '../actions'
+import type { AdminUser } from '../data/schema'
 
 type EditUserPageProps = {
-  userId: string
+  user: AdminUser
+  stations: HealthStationOption[]
 }
 
-export function EditUserPage({ userId }: EditUserPageProps) {
-  const user = createMockUsers(38).find((item) => item.id === userId)
+export function EditUserPage({ user, stations }: EditUserPageProps) {
+  const router = useRouter()
 
-  if (!user) {
-    return (
-      <section className='flex flex-col gap-4 sm:gap-6'>
-        <Alert variant='destructive'>
-          <AlertCircle />
-          <AlertTitle>We couldn&apos;t find that user</AlertTitle>
-          <AlertDescription>
-            The selected account is not available in the current local dataset.
-          </AlertDescription>
-        </Alert>
-        <div>
-          <Button asChild variant='outline'>
-            <Link href='/admin/users'>Back to users</Link>
-          </Button>
-        </div>
-      </section>
-    )
+  async function handleSubmit(values: AddUserValues, photoFormData?: FormData) {
+    const result = await updateUserAction(user.id, values, photoFormData)
+    if ('error' in result) {
+      toast.error(result.error)
+      return
+    }
+    toast.success('User updated successfully.')
+    router.push('/admin/users')
   }
-
-  function handleSubmit(values: AddUserValues) {
-    // Placeholder for edge-function integration.
-    console.log('Update user payload', values)
-  }
-
-  const now = new Date().toISOString()
 
   return (
     <section className='flex min-h-0 flex-1 flex-col'>
       <UserForm
         mode='edit'
-        seed={109}
-        defaultValues={buildDefaultFormValues({
-          seed: 109,
-          user,
-        })}
+        stations={stations}
+        defaultValues={buildDefaultFormValues({ user })}
         activity={{
-          createdAt: now,
-          updatedAt: now,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
           lastLoginAt: user.lastLoginAt,
-          passwordChangedAt: user.passwordState === 'updated' ? now : null,
+          passwordChangedAt: user.mustChangePassword ? null : user.passwordChangedAt,
         }}
         onSubmit={handleSubmit}
       />

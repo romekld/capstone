@@ -11,16 +11,18 @@ import {
 } from '@/lib/location'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/page-header'
+import { createRandomAvatarSeed, createUserAvatarDataUri } from '../../data/avatar'
 import { roleOptions } from '../../data/options'
 import {
   addUserSchema,
   buildDefaultFormValues,
   CITY_WIDE_ROLES,
+  createUserId,
   editUserSchema,
-  healthStationOptions,
   normalizePhoneInput,
   suggestUsername,
   type AddUserValues,
+  type HealthStationOption,
 } from '../../data/form-schema'
 import { UserFormMainPanel } from './user-form-main-panel'
 import { UserFormRightPanel } from './user-form-right-panel'
@@ -29,7 +31,8 @@ type UserFormMode = 'create' | 'edit'
 
 type UserFormProps = {
   mode: UserFormMode
-  seed: number
+  roleCounts?: Record<string, number>
+  stations: HealthStationOption[]
   defaultValues?: Partial<AddUserValues>
   activity?: {
     createdAt?: string
@@ -37,7 +40,7 @@ type UserFormProps = {
     lastLoginAt?: string | null
     passwordChangedAt?: string | null
   }
-  onSubmit: (values: AddUserValues) => void
+  onSubmit: (values: AddUserValues, photoFormData?: FormData) => void | Promise<void>
 }
 
 const roleAccessNotes: Record<string, string[]> = {
@@ -45,23 +48,15 @@ const roleAccessNotes: Record<string, string[]> = {
     'Records community visits and household-level data.',
     'Keep the purok assignment up to date.',
   ],
-  midwife_rhm: [
+  rhm: [
     'Reviews TCL records and oversees maternal workflows.',
     'A station assignment is required for this role.',
   ],
-  nurse_phn: [
+  phn: [
     'Coordinates reviews and escalations across stations.',
     'Usually set up as city-wide.',
   ],
-  dso: [
-    'Supports disease surveillance and response workflows.',
-    'Can view epidemiologic records and disease alerts.',
-  ],
-  phis_coordinator: [
-    'Handles MCT consolidation, DQC, and exports.',
-    'This role is city-wide and report-focused.',
-  ],
-  city_health_officer: [
+  cho: [
     'Read-only access to city-wide dashboards and alerts.',
     'Used for oversight and decision-making.',
   ],
@@ -117,24 +112,29 @@ function getInitials(firstName?: string, lastName?: string) {
 
 export function UserForm({
   mode,
-  seed,
+  roleCounts = {},
+  stations,
   defaultValues,
   activity,
   onSubmit,
 }: UserFormProps) {
-  const [photoPreviewUrl, setPhotoPreviewUrl] = useState('')
-  const [photoFileName, setPhotoFileName] = useState('')
+  const initialPhotoPath = defaultValues?.profilePhotoPath ?? ''
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState(initialPhotoPath)
   const [photoError, setPhotoError] = useState('')
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [isDobPickerOpen, setIsDobPickerOpen] = useState(false)
   const [isStationPickerOpen, setIsStationPickerOpen] = useState(false)
   const [showTempPassword, setShowTempPassword] = useState(false)
   const [usernameEdited, setUsernameEdited] = useState(false)
+  const [randomAvatarSeed, setRandomAvatarSeed] = useState(() => createRandomAvatarSeed())
+  const previousRoleRef = useRef<string | undefined>(undefined)
   const photoInputRef = useRef<HTMLInputElement>(null)
+  const photoObjectUrlRef = useRef<string | null>(null)
 
   const form = useForm<AddUserValues>({
     resolver: zodResolver(mode === 'create' ? addUserSchema : editUserSchema) as never,
     defaultValues: {
-      ...buildDefaultFormValues({ seed }),
+      ...buildDefaultFormValues({ roleCounts }),
       ...defaultValues,
     },
   })
@@ -155,14 +155,30 @@ export function UserForm({
   const firstName = values.firstName ?? ''
   const lastName = values.lastName ?? ''
   const role = values.role ?? 'bhw'
+  const sex = values.sex ?? 'F'
   const isActive = values.isActive ?? true
   const mustChangePassword = values.mustChangePassword ?? true
   const selectedProvince = values.province ?? ''
   const selectedCityMunicipality = values.cityMunicipality ?? ''
-  const selectedStationLabel = healthStationOptions.find(
-    (item) => item.value === values.healthStationId
-  )?.label
+  const selectedStationLabel = stations.find(
+    (item) => item.id === values.healthStationId
+  )?.name
   const provinceOptions = useMemo(() => getProvinceOptions(), [])
+  const generatedAvatarUrl = useMemo(
+    () =>
+      createUserAvatarDataUri({
+        userId: values.userId,
+        firstName,
+        lastName,
+        role,
+        sex,
+      }, {
+        seed: mode === 'create' ? randomAvatarSeed : undefined,
+      }),
+    [firstName, lastName, mode, randomAvatarSeed, role, sex, values.userId]
+  )
+  const hasCustomPhoto = Boolean(photoPreviewUrl)
+  const displayPhotoPreviewUrl = photoPreviewUrl || generatedAvatarUrl
   const cityMunicipalityOptions = useMemo(
     () => getCityMunicipalityOptionsByProvinceName(selectedProvince),
     [selectedProvince]
@@ -171,13 +187,41 @@ export function UserForm({
   const previousProvinceRef = useRef<string | undefined>(undefined)
   const previousDasmarinasModeRef = useRef<boolean | undefined>(undefined)
 
+  function revokePhotoObjectUrl() {
+    if (!photoObjectUrlRef.current) return
+    URL.revokeObjectURL(photoObjectUrlRef.current)
+    photoObjectUrlRef.current = null
+  }
+
+  function getCurrentDefaults() {
+    return {
+      ...buildDefaultFormValues({ roleCounts }),
+      ...defaultValues,
+    }
+  }
+
+  function handleResetForm() {
+    const nextDefaults = getCurrentDefaults()
+    setRandomAvatarSeed(createRandomAvatarSeed())
+    revokePhotoObjectUrl()
+    reset(nextDefaults)
+    setPhotoPreviewUrl(nextDefaults.profilePhotoPath ?? '')
+    setPhotoFile(null)
+    setPhotoError('')
+
+    if (photoInputRef.current) {
+      photoInputRef.current.value = ''
+    }
+  }
+
   useEffect(() => {
     return () => {
-      if (photoPreviewUrl) {
-        URL.revokeObjectURL(photoPreviewUrl)
+      if (photoObjectUrlRef.current) {
+        URL.revokeObjectURL(photoObjectUrlRef.current)
+        photoObjectUrlRef.current = null
       }
     }
-  }, [photoPreviewUrl])
+  }, [])
 
   useEffect(() => {
     if (usernameEdited) return
@@ -190,6 +234,24 @@ export function UserForm({
       shouldValidate: true,
     })
   }, [firstName, lastName, setValue, usernameEdited])
+
+  useEffect(() => {
+    if (mode !== 'create') return
+
+    if (previousRoleRef.current === undefined) {
+      previousRoleRef.current = role
+      return
+    }
+
+    if (previousRoleRef.current !== role) {
+      const nextCount = (roleCounts[role] ?? 0) + 1
+      setValue('userId', createUserId(role, nextCount), {
+        shouldDirty: false,
+        shouldValidate: true,
+      })
+      previousRoleRef.current = role
+    }
+  }, [role, mode, roleCounts, setValue])
 
   useEffect(() => {
     if (!CITY_WIDE_ROLES.includes(role)) {
@@ -237,6 +299,17 @@ export function UserForm({
     })
   }
 
+  function handleSexChange() {
+    if (mode !== 'create') return
+    // Reroll a fresh avatar when sex is toggled.
+    setRandomAvatarSeed(createRandomAvatarSeed())
+  }
+
+  function handleRerollAvatar() {
+    if (hasCustomPhoto) return
+    setRandomAvatarSeed(createRandomAvatarSeed())
+  }
+
   function handleChoosePhoto() {
     photoInputRef.current?.click()
   }
@@ -260,24 +333,21 @@ export function UserForm({
       return
     }
 
-    if (photoPreviewUrl) {
-      URL.revokeObjectURL(photoPreviewUrl)
-    }
+    revokePhotoObjectUrl()
 
     const localUrl = URL.createObjectURL(file)
+    photoObjectUrlRef.current = localUrl
     setPhotoError('')
-    setPhotoFileName(file.name)
+    setPhotoFile(file)
     setPhotoPreviewUrl(localUrl)
     setValue('profilePhotoPath', file.name, { shouldDirty: true })
   }
 
   function handleRemovePhoto() {
-    if (photoPreviewUrl) {
-      URL.revokeObjectURL(photoPreviewUrl)
-    }
+    revokePhotoObjectUrl()
 
     setPhotoError('')
-    setPhotoFileName('')
+    setPhotoFile(null)
     setPhotoPreviewUrl('')
     setValue('profilePhotoPath', '', { shouldDirty: true })
 
@@ -286,8 +356,19 @@ export function UserForm({
     }
   }
 
+  function handleFormSubmit(nextValues: AddUserValues) {
+    const photoFormData = new FormData()
+    photoFormData.set('avatarSeed', randomAvatarSeed)
+
+    if (photoFile) {
+      photoFormData.set('profilePhoto', photoFile)
+    }
+
+    return onSubmit(nextValues, photoFormData)
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='flex min-h-0 flex-1 flex-col'>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className='flex min-h-0 flex-1 flex-col'>
       <section className='mx-auto flex h-full min-h-0 w-full max-w-[1000px] flex-1 flex-col overflow-hidden'>
         <div className='shrink-0 bg-background/95 pb-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:pb-6'>
           <PageHeader
@@ -299,24 +380,25 @@ export function UserForm({
             }
             controls={
               <>
-                <Button asChild className='h-10 px-4' variant='outline'>
+                <Button asChild className='' variant='outline'>
                   <Link href='/admin/users'>Cancel</Link>
                 </Button>
                 <Button
-                  className='h-10 px-4'
-                  onClick={() =>
-                    reset({
-                      ...buildDefaultFormValues({ seed }),
-                      ...defaultValues,
-                    })
-                  }
+                  className=''
+                  onClick={handleResetForm}
                   type='button'
                   variant='outline'
                 >
                   Reset
                 </Button>
-                <Button className='h-10 px-4' type='submit' disabled={isSubmitting}>
-                  {mode === 'create' ? 'Create User' : 'Update User'}
+                <Button className='' type='submit' disabled={isSubmitting}>
+                  {isSubmitting
+                  ? mode === 'create'
+                    ? 'Creating...'
+                    : 'Updating...'
+                  : mode === 'create'
+                    ? 'Create User'
+                    : 'Update User'}
                 </Button>
               </>
             }
@@ -333,6 +415,7 @@ export function UserForm({
                 register={register}
                 values={values}
                 role={role}
+                stations={stations}
                 isActive={isActive}
                 showTempPassword={showTempPassword}
                 setShowTempPassword={setShowTempPassword}
@@ -342,6 +425,7 @@ export function UserForm({
                 setIsStationPickerOpen={setIsStationPickerOpen}
                 selectedStationLabel={selectedStationLabel}
                 onUsernameManualEdit={() => setUsernameEdited(true)}
+                onSexChange={handleSexChange}
                 onPhoneChange={handlePhoneChange}
                 toIsoDate={toIsoDate}
                 parseIsoDate={parseIsoDate}
@@ -354,16 +438,18 @@ export function UserForm({
 
               <UserFormRightPanel
                 values={values}
+                stations={stations}
                 roleOptionLabel={roleOption?.label}
                 roleNotes={roleNotes}
                 mustChangePassword={mustChangePassword}
                 isActive={isActive}
                 activity={activity}
-                photoPreviewUrl={photoPreviewUrl}
-                photoFileName={photoFileName}
+                photoPreviewUrl={displayPhotoPreviewUrl}
+                hasCustomPhoto={hasCustomPhoto}
                 photoError={photoError}
                 photoInputRef={photoInputRef}
                 onChoosePhoto={handleChoosePhoto}
+                onRerollAvatar={handleRerollAvatar}
                 onPhotoChange={handlePhotoChange}
                 onRemovePhoto={handleRemovePhoto}
                 toDisplayDate={toDisplayDate}

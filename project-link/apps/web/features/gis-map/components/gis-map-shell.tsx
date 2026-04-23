@@ -2,11 +2,12 @@
 
 import type React from 'react'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/components/theme-provider'
 import maplibregl, {
   type LngLatBoundsLike,
   type Map as MapLibreMap,
   type MapLayerMouseEvent,
+  type MapMouseEvent,
 } from 'maplibre-gl'
 import { ExpandIcon, LocateFixedIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -19,36 +20,60 @@ import { cn } from '@/lib/utils'
 import type {
   GisGeometry,
   GisMapPopupState,
+  GisPointFeature,
+  GisPointFeatureCollection,
   GisPolygonFeature,
   GisPolygonFeatureCollection,
 } from '../data/types'
 import {
   GIS_BOUNDARY_FILL_LAYER,
+  GIS_POINT_LAYER,
   ensureGisLayers,
   setBoundarySourceData,
   setHoveredBoundary,
+  setHoveredPoint,
   setPreviewGeometry,
+  setPointSourceData,
   setSelectedBoundary,
+  setSelectedPoint,
 } from '../lib/layers'
 import { getGisMapStyleUrl } from '../lib/styles'
 
 type GisMapShellProps = {
   className?: string
   featureCollection: GisPolygonFeatureCollection
+  pointFeatureCollection?: GisPointFeatureCollection | null
   selectedId: string | null
+  selectedPointId?: string | null
+  draggablePointId?: string | null
   previewGeometry: GisGeometry | null
   onPolygonClick: (id: string, popup: GisMapPopupState) => void
+  onPointClick?: (id: string, popup: GisMapPopupState) => void
+  onPointDrag?: (coordinates: { lat: number; lng: number }) => void
+  onPointDragEnd?: (coordinates: { lat: number; lng: number }) => void
+  onMapClick?: (event: MapMouseEvent) => void
   onMapMoveStart?: () => void
+  initialFitScope?: 'all' | 'boundaries'
+  fitKey?: number | string
   children?: React.ReactNode
 }
 
 export function GisMapShell({
   className,
   featureCollection,
+  pointFeatureCollection,
   selectedId,
+  selectedPointId,
+  draggablePointId,
   previewGeometry,
   onPolygonClick,
+  onPointClick,
+  onPointDrag,
+  onPointDragEnd,
+  onMapClick,
   onMapMoveStart,
+  initialFitScope = 'all',
+  fitKey,
   children,
 }: GisMapShellProps) {
   const { resolvedTheme } = useTheme()
@@ -60,20 +85,42 @@ export function GisMapShell({
   const currentStyleRef = useRef<string | null>(null)
   const mapReadyRef = useRef(false)
   const interactionsReadyRef = useRef(false)
+  const pointInteractionsReadyRef = useRef(false)
   const hoveredIdRef = useRef<string | null>(null)
+  const hoveredPointIdRef = useRef<string | null>(null)
   const polygonClickRef = useRef(onPolygonClick)
+  const pointClickRef = useRef(onPointClick)
+  const pointDragRef = useRef(onPointDrag)
+  const pointDragEndRef = useRef(onPointDragEnd)
+  const draggablePointIdRef = useRef<string | null>(draggablePointId ?? null)
+  const fitKeyRef = useRef<number | string | undefined>(undefined)
+  const mapClickRef = useRef(onMapClick)
   const moveStartRef = useRef(onMapMoveStart)
   const hydrateLayersRef = useRef<(map: MapLibreMap) => void>(() => undefined)
-  const cityBoundsRef = useRef<[[number, number], [number, number]] | null>(
+  const fitBoundsRef = useRef<[[number, number], [number, number]] | null>(
     null
   )
+  const draggingPointIdRef = useRef<string | null>(null)
 
-  const cityBounds = useMemo(
+  const boundaryBounds = useMemo(
+    () => getGeometryBounds(featureCollection.features.map((feature) => feature.geometry)),
+    [featureCollection]
+  )
+
+  const allGeometryBounds = useMemo(
     () =>
       getGeometryBounds(
-        featureCollection.features.map((feature) => feature.geometry)
+        [
+          ...featureCollection.features.map((feature) => feature.geometry),
+          ...(pointFeatureCollection?.features.map((feature) => feature.geometry) ?? []),
+        ]
       ),
-    [featureCollection]
+    [featureCollection, pointFeatureCollection]
+  )
+
+  const fitBounds = useMemo(
+    () => (initialFitScope === 'boundaries' ? boundaryBounds : allGeometryBounds),
+    [allGeometryBounds, boundaryBounds, initialFitScope]
   )
 
   const hydrateLayers = useCallback(
@@ -84,7 +131,10 @@ export function GisMapShell({
         previewGeometry,
         selectedId,
         hoveredIdRef.current,
-        mode
+        mode,
+        pointFeatureCollection,
+        selectedPointId ?? null,
+        hoveredPointIdRef.current
       )
       registerInteractionsOnce(
         map,
@@ -92,8 +142,18 @@ export function GisMapShell({
         hoveredIdRef,
         polygonClickRef
       )
+      registerPointInteractionsOnce(
+        map,
+        pointInteractionsReadyRef,
+        hoveredPointIdRef,
+        draggingPointIdRef,
+        draggablePointIdRef,
+        pointDragRef,
+        pointClickRef,
+        pointDragEndRef
+      )
     },
-    [featureCollection, mode, previewGeometry, selectedId]
+    [featureCollection, mode, pointFeatureCollection, previewGeometry, selectedId, selectedPointId]
   )
 
   useEffect(() => {
@@ -101,12 +161,44 @@ export function GisMapShell({
   }, [onPolygonClick])
 
   useEffect(() => {
+    pointClickRef.current = onPointClick
+  }, [onPointClick])
+
+  useEffect(() => {
+    pointDragRef.current = onPointDrag
+  }, [onPointDrag])
+
+  useEffect(() => {
+    pointDragEndRef.current = onPointDragEnd
+  }, [onPointDragEnd])
+
+  useEffect(() => {
+    draggablePointIdRef.current = draggablePointId ?? null
+  }, [draggablePointId])
+
+  useEffect(() => {
+    if (fitKey === fitKeyRef.current) return
+    const prev = fitKeyRef.current
+    fitKeyRef.current = fitKey
+    if (prev === undefined) return
+    const map = mapRef.current
+    if (!map || !mapReadyRef.current) return
+    const bounds = fitBoundsRef.current
+    if (!bounds) return
+    map.fitBounds(bounds as LngLatBoundsLike, { padding: 44, duration: 450 })
+  }, [fitKey])
+
+  useEffect(() => {
+    mapClickRef.current = onMapClick
+  }, [onMapClick])
+
+  useEffect(() => {
     moveStartRef.current = onMapMoveStart
   }, [onMapMoveStart])
 
   useEffect(() => {
-    cityBoundsRef.current = cityBounds
-  }, [cityBounds])
+    fitBoundsRef.current = fitBounds
+  }, [fitBounds])
 
   useEffect(() => {
     hydrateLayersRef.current = hydrateLayers
@@ -135,8 +227,8 @@ export function GisMapShell({
       mapReadyRef.current = true
       hydrateLayersRef.current(map)
 
-      if (cityBoundsRef.current) {
-        map.fitBounds(cityBoundsRef.current as LngLatBoundsLike, {
+      if (fitBoundsRef.current) {
+        map.fitBounds(fitBoundsRef.current as LngLatBoundsLike, {
           padding: 44,
           duration: 0,
         })
@@ -149,6 +241,10 @@ export function GisMapShell({
 
     map.on('zoomstart', () => {
       moveStartRef.current?.()
+    })
+
+    map.on('click', (event) => {
+      mapClickRef.current?.(event)
     })
 
     mapRef.current = map
@@ -185,10 +281,28 @@ export function GisMapShell({
 
   useEffect(() => {
     const map = mapRef.current
+    if (!map || !mapReadyRef.current || !pointFeatureCollection) return
+
+    if (map.getSource('gis-points')) {
+      setPointSourceData(map, pointFeatureCollection)
+    } else {
+      hydrateLayersRef.current(map)
+    }
+  }, [pointFeatureCollection])
+
+  useEffect(() => {
+    const map = mapRef.current
     if (!map || !mapReadyRef.current) return
 
     setSelectedBoundary(map, selectedId)
   }, [selectedId])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReadyRef.current) return
+
+    setSelectedPoint(map, selectedPointId ?? null)
+  }, [selectedPointId])
 
   useEffect(() => {
     const map = mapRef.current
@@ -199,9 +313,9 @@ export function GisMapShell({
 
   function fitCity() {
     const map = mapRef.current
-    if (!map || !cityBounds) return
+    if (!map || !fitBounds) return
 
-    map.fitBounds(cityBounds as LngLatBoundsLike, {
+    map.fitBounds(fitBounds as LngLatBoundsLike, {
       padding: 44,
       duration: 450,
     })
@@ -222,7 +336,7 @@ export function GisMapShell({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              aria-label='Fit map to city boundaries'
+              aria-label='Fit map to visible boundaries'
               onClick={fitCity}
               size='icon'
               variant='secondary'
@@ -230,7 +344,7 @@ export function GisMapShell({
               <LocateFixedIcon />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Fit city</TooltipContent>
+          <TooltipContent>Fit boundaries</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -247,7 +361,7 @@ export function GisMapShell({
         </Tooltip>
       </div>
 
-      <div className='h-full min-h-[480px] w-full' ref={containerRef} />
+      <div className='h-full w-full' ref={containerRef} />
       {children}
     </div>
   )
@@ -303,6 +417,126 @@ function registerInteractionsOnce(
   interactionsReadyRef.current = true
 }
 
+function registerPointInteractionsOnce(
+  map: MapLibreMap,
+  interactionsReadyRef: React.MutableRefObject<boolean>,
+  hoveredIdRef: React.MutableRefObject<string | null>,
+  draggingPointIdRef: React.MutableRefObject<string | null>,
+  draggablePointIdRef: React.MutableRefObject<string | null>,
+  pointDragRef: React.MutableRefObject<
+    ((coordinates: { lat: number; lng: number }) => void) | undefined
+  >,
+  pointClickRef: React.MutableRefObject<
+    ((id: string, popup: GisMapPopupState) => void) | undefined
+  >,
+  pointDragEndRef?: React.MutableRefObject<
+    ((coordinates: { lat: number; lng: number }) => void) | undefined
+  >
+) {
+  if (interactionsReadyRef.current) return
+
+  let lastDragCoords: { lat: number; lng: number } | null = null
+
+  map.on('click', GIS_POINT_LAYER, (event: MapLayerMouseEvent) => {
+    const feature = event.features?.[0] as GisPointFeature | undefined
+    const id = feature?.properties?.id
+
+    if (typeof id === 'string') {
+      pointClickRef.current?.(id, {
+        id,
+        lngLat: {
+          lng: event.lngLat.lng,
+          lat: event.lngLat.lat,
+        },
+        point: {
+          x: event.point.x,
+          y: event.point.y,
+        },
+      })
+    }
+  })
+
+  map.on('mousemove', GIS_POINT_LAYER, (event: MapLayerMouseEvent) => {
+    if (draggingPointIdRef.current) {
+      map.getCanvas().style.cursor = 'grabbing'
+      return
+    }
+
+    const feature = event.features?.[0] as GisPointFeature | undefined
+    const id = feature?.properties?.id ?? null
+
+    if (id !== hoveredIdRef.current) {
+      hoveredIdRef.current = id
+      setHoveredPoint(map, id)
+    }
+
+    map.getCanvas().style.cursor = id ? 'pointer' : ''
+  })
+
+  map.on('mousedown', GIS_POINT_LAYER, (event: MapLayerMouseEvent) => {
+    const feature = event.features?.[0] as GisPointFeature | undefined
+    const id = feature?.properties?.id
+
+    if (
+      typeof id !== 'string' ||
+      id !== draggablePointIdRef.current ||
+      !pointDragRef.current
+    ) {
+      return
+    }
+
+    draggingPointIdRef.current = id
+    map.getCanvas().style.cursor = 'grabbing'
+
+    if (map.dragPan.isEnabled()) {
+      map.dragPan.disable()
+    }
+
+    const startCoords = { lat: event.lngLat.lat, lng: event.lngLat.lng }
+    lastDragCoords = startCoords
+    pointDragRef.current(startCoords)
+  })
+
+  map.on('mousemove', (event: MapMouseEvent) => {
+    if (!draggingPointIdRef.current || !pointDragRef.current) return
+
+    const coords = { lat: event.lngLat.lat, lng: event.lngLat.lng }
+    lastDragCoords = coords
+    pointDragRef.current(coords)
+    map.getCanvas().style.cursor = 'grabbing'
+  })
+
+  const finishPointDrag = () => {
+    if (!draggingPointIdRef.current) return
+
+    const finalCoords = lastDragCoords
+    lastDragCoords = null
+    draggingPointIdRef.current = null
+    map.getCanvas().style.cursor = ''
+
+    if (!map.dragPan.isEnabled()) {
+      map.dragPan.enable()
+    }
+
+    if (finalCoords && pointDragEndRef?.current) {
+      pointDragEndRef.current(finalCoords)
+    }
+  }
+
+  map.on('mouseup', finishPointDrag)
+  map.on('mouseleave', finishPointDrag)
+
+  map.on('mouseleave', GIS_POINT_LAYER, () => {
+    if (draggingPointIdRef.current) return
+
+    hoveredIdRef.current = null
+    setHoveredPoint(map, null)
+    map.getCanvas().style.cursor = ''
+  })
+
+  interactionsReadyRef.current = true
+}
+
 function getGeometryBounds(geometries: GisGeometry[]) {
   let minLng = Number.POSITIVE_INFINITY
   let minLat = Number.POSITIVE_INFINITY
@@ -330,6 +564,11 @@ function visitPositions(
   geometry: GisGeometry,
   visit: (position: [number, number]) => void
 ) {
+  if (geometry.type === 'Point') {
+    visit([geometry.coordinates[0], geometry.coordinates[1]])
+    return
+  }
+
   if (geometry.type === 'Polygon') {
     for (const ring of geometry.coordinates) {
       for (const position of ring) {

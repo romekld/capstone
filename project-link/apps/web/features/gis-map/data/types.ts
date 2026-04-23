@@ -1,10 +1,16 @@
 export type GisPosition = [number, number] | [number, number, number]
 
+export type GisPointCoordinates = [number, number]
+
 export type GisPolygonCoordinates = GisPosition[][]
 
 export type GisMultiPolygonCoordinates = GisPolygonCoordinates[]
 
 export type GisGeometry =
+  | {
+      type: 'Point'
+      coordinates: GisPointCoordinates
+    }
   | {
       type: 'Polygon'
       coordinates: GisPolygonCoordinates
@@ -33,7 +39,8 @@ export type GisPolygonFeatureProperties = {
   name: string
   pcode: string
   inCho2Scope: boolean
-  [key: string]: string | number | boolean | null
+  stagedAction?: string | null
+  [key: string]: string | number | boolean | null | undefined
 }
 
 export type GisPolygonFeature = {
@@ -46,6 +53,26 @@ export type GisPolygonFeature = {
 export type GisPolygonFeatureCollection = {
   type: 'FeatureCollection'
   features: GisPolygonFeature[]
+}
+
+export type GisPointFeatureProperties = {
+  id: string
+  name: string
+  pcode: string
+  pinStatus?: string | null
+  [key: string]: string | number | boolean | null | undefined
+}
+
+export type GisPointFeature = {
+  type: 'Feature'
+  id?: string | number
+  geometry: Extract<GisGeometry, { type: 'Point' }>
+  properties: GisPointFeatureProperties
+}
+
+export type GisPointFeatureCollection = {
+  type: 'FeatureCollection'
+  features: GisPointFeature[]
 }
 
 export type GisPreviewFeatureCollection = {

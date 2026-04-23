@@ -12,33 +12,56 @@ import type {
   GisPolygonFeatureCollection,
 } from '@/features/gis-map/data/types'
 import type {
+  CoveragePlannerRecord,
+  CoverageStagedAction,
+} from '../data/coverage-schema'
+import { toCoverageFeatureCollection } from '../data/coverage-helpers'
+import type {
   CityBarangayImportItem,
   CityBarangayRegistryRecord,
 } from '../data/schema'
 import { formatArea, formatDate, formatScope } from '../data/formatters'
 import { toRegistryFeatureCollection } from '../data/geojson'
+import { CoverageMapPopupContent } from './coverage-planner/coverage-map-popup-content'
 
 type RegistryMapCanvasProps = {
   records: CityBarangayRegistryRecord[]
+  coverageRecords: CoveragePlannerRecord[]
+  mode: 'registry' | 'coverage'
   selectedPcode: string | null
   previewItem: CityBarangayImportItem | null
   onSelectPcode: (pcode: string) => void
   onOpenHistory: (record: CityBarangayRegistryRecord) => void
+  onStageCoverage?: (
+    record: CoveragePlannerRecord,
+    action: CoverageStagedAction
+  ) => void
+  onUndoCoverage?: (record: CoveragePlannerRecord) => void
 }
 
 export function RegistryMapCanvas({
   records,
+  coverageRecords,
+  mode,
   selectedPcode,
   previewItem,
   onSelectPcode,
   onOpenHistory,
+  onStageCoverage,
+  onUndoCoverage,
 }: RegistryMapCanvasProps) {
   const [popup, setPopup] = useState<GisMapPopupState | null>(null)
 
   const featureCollection = useMemo(
-    () =>
-      toRegistryFeatureCollection(records) as unknown as GisPolygonFeatureCollection,
-    [records]
+    () => {
+      const collection =
+        mode === 'coverage'
+          ? toCoverageFeatureCollection(coverageRecords)
+          : toRegistryFeatureCollection(records)
+
+      return collection as unknown as GisPolygonFeatureCollection
+    },
+    [coverageRecords, mode, records]
   )
 
   const selectedRecord = useMemo(
@@ -51,6 +74,10 @@ export function RegistryMapCanvas({
     () => records.find((record) => record.id === popup?.id) ?? null,
     [popup?.id, records]
   )
+  const popupCoverageRecord = useMemo(
+    () => coverageRecords.find((record) => record.id === popup?.id) ?? null,
+    [coverageRecords, popup?.id]
+  )
 
   function handlePolygonClick(id: string, nextPopup: GisMapPopupState) {
     const record = records.find((item) => item.id === id)
@@ -62,7 +89,7 @@ export function RegistryMapCanvas({
 
   return (
     <GisMapShell
-      className='min-h-[520px]'
+      className='min-h-[320px] md:min-h-[420px] xl:min-h-0'
       featureCollection={featureCollection}
       onMapMoveStart={() => setPopup(null)}
       onPolygonClick={handlePolygonClick}
@@ -71,10 +98,17 @@ export function RegistryMapCanvas({
     >
       <GisMapPopup
         onClose={() => setPopup(null)}
-        popup={popupRecord ? popup : null}
+        popup={popup ? popup : null}
         showCloseButton={false}
       >
-        {popupRecord ? (
+        {mode === 'coverage' && popupCoverageRecord ? (
+          <CoverageMapPopupContent
+            onClose={() => setPopup(null)}
+            onStage={(record, action) => onStageCoverage?.(record, action)}
+            onUndo={(record) => onUndoCoverage?.(record)}
+            record={popupCoverageRecord}
+          />
+        ) : popupRecord ? (
           <MapPopupContent
             onClose={() => setPopup(null)}
             onOpenHistory={() => onOpenHistory(popupRecord)}

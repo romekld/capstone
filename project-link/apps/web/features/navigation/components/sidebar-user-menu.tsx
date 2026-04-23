@@ -1,11 +1,14 @@
 "use client"
 
+import { useTransition } from "react"
+import { useRouter } from "next/navigation"
 import {
   BadgeCheckIcon,
   BellIcon,
   ChevronsUpDownIcon,
   LogOutIcon,
 } from "lucide-react"
+import { logoutAction } from "@/features/auth/logout/actions"
 
 import {
   Avatar,
@@ -35,6 +38,16 @@ type SidebarUserMenuProps = {
 
 export function SidebarUserMenu({ viewer }: SidebarUserMenuProps) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+  const [isLoggingOut, startLogoutTransition] = useTransition()
+
+  function handleLogout() {
+    startLogoutTransition(async () => {
+      await logoutAction()
+      router.replace("/login")
+      router.refresh()
+    })
+  }
 
   return (
     <SidebarMenu>
@@ -90,9 +103,15 @@ export function SidebarUserMenu({ viewer }: SidebarUserMenuProps) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={isLoggingOut}
+              onSelect={(event) => {
+                event.preventDefault()
+                handleLogout()
+              }}
+            >
               <LogOutIcon />
-              Log out
+              {isLoggingOut ? "Logging out..." : "Log out"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

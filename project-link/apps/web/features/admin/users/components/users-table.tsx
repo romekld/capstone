@@ -115,7 +115,7 @@ export function UsersTable({ data, onResetPasswords, onSetStatus }: UsersTablePr
     initialState: {
       pagination: {
         pageIndex: 0,
-        pageSize: 10,
+        pageSize: 8,
       },
     },
     globalFilterFn: (row, _columnId, value) => {
@@ -212,7 +212,7 @@ export function UsersTable({ data, onResetPasswords, onSetStatus }: UsersTablePr
             ],
           },
         ]}
-        searchPlaceholder='Search name, user id, username, email, phone, or BHS...'
+        searchPlaceholder='Search User'
       />
 
       <div className='hidden overflow-hidden rounded-md border md:block'>

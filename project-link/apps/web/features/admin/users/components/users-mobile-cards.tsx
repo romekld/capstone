@@ -61,7 +61,7 @@ export function UsersMobileCards({
                   onCheckedChange={(checked) => row.toggleSelected(!!checked)}
                 />
                 <Avatar className='size-10 rounded-lg'>
-                  <AvatarImage alt={`${user.firstName} ${user.lastName}`} src='' />
+                  <AvatarImage alt={`${user.firstName} ${user.lastName}`} src={user.profilePhotoUrl} />
                   <AvatarFallback className='rounded-lg'>
                     {getInitials(user.firstName, user.lastName)}
                   </AvatarFallback>
@@ -98,9 +98,7 @@ export function UsersMobileCards({
               <div className='grid grid-cols-[88px_1fr] gap-2'>
                 <dt className='text-muted-foreground'>Password</dt>
                 <dd>
-                  {user.passwordState === 'change_pending'
-                    ? 'Change pending'
-                    : 'Updated'}
+                  {user.mustChangePassword ? 'Change pending' : 'Updated'}
                 </dd>
               </div>
               <div className='grid grid-cols-[88px_1fr] gap-2'>

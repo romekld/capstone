@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { getRoleHome } from '@/features/navigation/data/role-policy'
 
@@ -54,6 +55,12 @@ export async function loginAction(
     await supabase.auth.signOut()
     return { error: 'This role is not enabled for the dashboard yet.' }
   }
+
+  const admin = createAdminClient()
+  await admin
+    .from('profiles')
+    .update({ last_login_at: new Date().toISOString() })
+    .eq('id', user.id)
 
   redirect(roleHome)
 }

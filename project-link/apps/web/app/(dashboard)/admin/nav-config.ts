@@ -1,6 +1,5 @@
 import {
   Building2Icon,
-  ClipboardListIcon,
   LayoutDashboardIcon,
   MapIcon,
   MapPinnedIcon,
@@ -12,7 +11,7 @@ import type { SidebarSection } from "@/features/navigation/data/types"
 export const adminNavSections = [
   {
     id: "admin-main",
-    label: "Admin Navigation",
+    label: "Navigation",
     items: [
       {
         id: "admin-dashboard",
@@ -36,17 +35,10 @@ export const adminNavSections = [
         children: [
           {
             id: "admin-health-stations-city-barangays",
-            title: "City Barangays",
+            title: "Barangays",
             href: "/admin/health-stations/city-barangays",
             icon: MapIcon,
             match: ["/admin/health-stations/city-barangays"],
-          },
-          {
-            id: "admin-health-stations-coverage-planner",
-            title: "Coverage Planner",
-            href: "/admin/health-stations/coverage-planner",
-            icon: MapIcon,
-            match: ["/admin/health-stations/coverage-planner"],
           },
           {
             id: "admin-health-stations-manage-bhs",
@@ -55,13 +47,7 @@ export const adminNavSections = [
             icon: MapPinnedIcon,
             match: ["/admin/health-stations/manage"],
           },
-          {
-            id: "admin-health-stations-assignments",
-            title: "Station Assignments",
-            href: "/admin/health-stations/assignments",
-            icon: ClipboardListIcon,
-            match: ["/admin/health-stations/assignments"],
-          },
+
         ],
       },
     ],

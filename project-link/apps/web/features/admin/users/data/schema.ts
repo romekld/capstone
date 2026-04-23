@@ -4,7 +4,6 @@ export type UserRole =
   | 'bhw'
   | 'rhm'
   | 'phn'
-  | 'phis'
   | 'cho'
   | 'system_admin'
 
@@ -14,9 +13,13 @@ export type AdminUser = {
   firstName: string
   middleName?: string
   lastName: string
+  nameSuffix?: string
+  dateOfBirth?: string
+  sex?: 'M' | 'F'
   username: string
   email: string
   mobileNumber: string
+  alternateMobileNumber?: string
   addressLine1?: string
   addressLine2?: string
   cityMunicipality?: string
@@ -25,6 +28,15 @@ export type AdminUser = {
   role: UserRole
   healthStationName: string | null
   healthStationId: string | null
+  healthStationCode: string | null
+  purokAssignment?: string
+  coverageNotes?: string
+  adminNotes?: string
+  profilePhotoUrl?: string
+  deactivationReason?: string
   mustChangePassword: boolean
   lastLoginAt: string | null
+  passwordChangedAt: string | null
+  createdAt: string
+  updatedAt: string
 }

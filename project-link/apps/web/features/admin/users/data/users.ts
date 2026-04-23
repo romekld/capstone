@@ -1,4 +1,5 @@
 import type { AdminUser, UserRole, UserStatus } from './schema'
+import { ROLE_PREFIXES } from './form-schema'
 
 const firstNames = [
   'Aira',
@@ -37,11 +38,9 @@ const stations = [
 
 const roles: UserRole[] = [
   'bhw',
-  'midwife_rhm',
-  'nurse_phn',
-  'dso',
-  'phis_coordinator',
-  'city_health_officer',
+  'rhm',
+  'phn',
+  'cho',
   'system_admin',
 ]
 
@@ -53,10 +52,8 @@ function toSlug(value: string) {
 
 function shouldUseCityWide(role: UserRole) {
   return [
-    'nurse_phn',
-    'dso',
-    'phis_coordinator',
-    'city_health_officer',
+    'phn',
+    'cho',
     'system_admin',
   ].includes(role)
 }
@@ -75,7 +72,7 @@ export function createMockUsers(count = 30): AdminUser[] {
 
     return {
       id: `u-${index + 1}`,
-      userId: `USR-2026-${String(index + 1).padStart(4, '0')}`,
+      userId: `${ROLE_PREFIXES[role] ?? 'USR'}-2026-${String(index + 1).padStart(6, '0')}`,
       firstName,
       lastName,
       username: `${toSlug(firstName)}.${toSlug(lastName)}${index + 1}`,
@@ -84,11 +81,20 @@ export function createMockUsers(count = 30): AdminUser[] {
       status,
       role,
       healthStationName: station,
-      passwordState: index % 3 === 0 ? 'change_pending' : 'updated',
+      healthStationId: station ? `station-${toSlug(station)}` : null,
+      healthStationCode: station ? `BHS-${String(index % 5 + 1).padStart(3, '0')}` : null,
+      healthStationSlug: station ? station.toLowerCase().replace(/\s+/g, '-') : null,
+      mustChangePassword: index % 3 === 0,
       lastLoginAt:
         status === 'invited'
           ? null
           : new Date(now - (index + 2) * 86400000).toISOString(),
+      passwordChangedAt:
+        index % 3 === 0
+          ? null
+          : new Date(now - (index + 5) * 86400000).toISOString(),
+      createdAt: new Date(now - (index + 10) * 86400000).toISOString(),
+      updatedAt: new Date(now - (index + 2) * 86400000).toISOString(),
     }
   })
 }

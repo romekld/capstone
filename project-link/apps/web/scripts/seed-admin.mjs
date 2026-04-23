@@ -45,7 +45,7 @@ if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
 
 // ── seed config — change these before running ────────────────────────────────
 const SEED_USER = {
-  email: 'admin@cho2.gov.ph',
+  email: 'admin@projectlink.ph',
   password: 'projectlink@cho2',   // ≥ 12 chars — user will be forced to change this
   firstName: 'System',
   lastName: 'Admin',

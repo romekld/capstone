@@ -1,18 +1,44 @@
-import { HeartPulseIcon } from "lucide-react"
+import { Building2, CloudUpload, House } from "lucide-react"
 
 import type { SidebarSection } from "@/features/navigation/data/types"
 
 export const bhwNavSections = [
   {
     id: "bhw-main",
-    label: "BHW Navigation",
+    label: "Overview",
     items: [
       {
         id: "bhw-dashboard",
-        title: "Dashboard",
+        title: "Home",
         href: "/bhw/dashboard",
-        icon: HeartPulseIcon,
+        icon: House,
         match: ["/bhw/dashboard"],
+      },
+    ],
+  },
+  {
+    id: "bhw-field",
+    label: "Field Operations",
+    items: [
+      {
+        id: "bhw-households",
+        title: "Households",
+        href: "/bhw/households",
+        icon: Building2,
+        match: ["/bhw/households"],
+      },
+    ],
+  },
+  {
+    id: "bhw-data",
+    label: "Data",
+    items: [
+      {
+        id: "bhw-sync",
+        title: "Sync Queue",
+        href: "/bhw/sync",
+        icon: CloudUpload,
+        match: ["/bhw/sync"],
       },
     ],
   },
