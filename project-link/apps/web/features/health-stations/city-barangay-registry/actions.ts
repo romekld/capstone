@@ -49,7 +49,9 @@ export async function applyCoverageChangesAction(
   if (lookupError) return { error: lookupError.message }
 
   const pcodeToId = Object.fromEntries(
-    ((cityBarangays ?? []) as { id: string; pcode: string }[]).map((cb) => [cb.pcode, cb.id])
+    ((cityBarangays ?? []) as unknown as { id: string; pcode: string }[]).map(
+      (cb) => [cb.pcode, cb.id]
+    )
   )
 
   for (const [pcode, action] of entries) {

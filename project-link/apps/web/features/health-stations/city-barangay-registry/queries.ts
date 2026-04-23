@@ -95,7 +95,7 @@ export const getCityBarangayRegistryData = cache(
 
     if (error) throw error
 
-    const records = ((rows ?? []) as RegistryViewRow[])
+    const records = ((rows ?? []) as unknown as RegistryViewRow[])
       .map(mapRegistryRow)
       .sort((a, b) => a.name.localeCompare(b.name))
 
@@ -107,7 +107,7 @@ export const getCityBarangayRegistryData = cache(
       .order('version_no', { ascending: false })
 
     const geometryVersions: CityBarangayGeometryVersion[] = (
-      (versionRows ?? []) as {
+      (versionRows ?? []) as unknown as {
         id: string
         city_barangay_id: string
         version_no: number
@@ -142,7 +142,7 @@ export const getCityBarangayRegistryData = cache(
     let importItems: CityBarangayImportItem[] = []
 
     if (jobRow) {
-      const j = jobRow as {
+      const j = jobRow as unknown as {
         id: string
         filename: string
         status: string
@@ -176,7 +176,7 @@ export const getCityBarangayRegistryData = cache(
         .eq('job_id', j.id)
         .order('feature_index')
 
-      importItems = ((itemRows ?? []) as {
+      importItems = ((itemRows ?? []) as unknown as {
         id: string
         job_id: string
         feature_index: number
@@ -231,7 +231,7 @@ export async function getGeometryVersions(
 
   if (error) throw error
 
-  return ((data ?? []) as {
+  return ((data ?? []) as unknown as {
     id: string
     city_barangay_id: string
     version_no: number
