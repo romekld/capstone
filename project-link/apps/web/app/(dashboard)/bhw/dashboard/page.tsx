@@ -1,3 +1,6 @@
+import { BhwDashboardPage } from "@/features/bhw/dashboard"
+import { mockBhwDashboard } from "@/features/bhw/dashboard/data/mock"
+
 export default function Page() {
-  return <h1 className="font-heading text-2xl">BHW Dashboard</h1>
+  return <BhwDashboardPage {...mockBhwDashboard} />
 }

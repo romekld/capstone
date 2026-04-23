@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DashboardBreadcrumbs } from "@/components/dashboard-breadcrumbs";
 import { DashboardHeaderActions } from "@/components/dashboard-header-actions";
-import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
@@ -39,11 +37,6 @@ export function DashboardHeader() {
                 )}
             >
                 <SidebarTrigger />
-                <Separator
-                    orientation="vertical"
-                    className="data-vertical:h-4 data-vertical:self-auto"
-                />
-                <DashboardBreadcrumbs />
                 <div className="ml-auto">
                     <DashboardHeaderActions />
                 </div>

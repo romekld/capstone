@@ -157,8 +157,6 @@ Clean and minimal. Prioritize information clarity over decoration. All layouts m
 
 **Offline/sync state (PWA):** Always show online/offline status and count of pending-sync records. Submitting while offline must feel intentional ("Saved locally — will sync when online").
 
-**Touch targets (PWA):** Minimum 44×44px touch targets. BHWs work in field conditions, often one-handed.
-
 **Progressive form saving (PWA):** Long clinical forms (maternal, NCD) must auto-save to IndexedDB as the user fills them out — recoverable if the app is closed mid-form.
 
 **Keyboard navigation (web):** PHN and CHO reporting dashboards are desktop-heavy. All tables, modals, and form flows must be fully keyboard-navigable.
