@@ -15,18 +15,16 @@ export const ROLE_REQUIRES_STATION: UserRole[] = ['bhw', 'rhm']
 
 export const CITY_WIDE_ROLES: UserRole[] = [
   'phn',
-  'phis',
   'cho',
   'system_admin',
 ]
 
-export const healthStationOptions = [
-  { label: 'BHS Paliparan III', value: 'bhs-paliparan-iii' },
-  { label: 'BHS Salawag', value: 'bhs-salawag' },
-  { label: 'BHS Sampaloc I', value: 'bhs-sampaloc-i' },
-  { label: 'BHS San Dionisio', value: 'bhs-san-dionisio' },
-  { label: 'BHS Burol Main', value: 'bhs-burol-main' },
-] as const
+// Station options are now fetched from the DB and passed as props — no hardcoded list.
+export type HealthStationOption = {
+  id: string
+  name: string
+  stationCode: string
+}
 
 export const sexOptions = [
   { label: 'Male', value: 'M' },
@@ -75,7 +73,7 @@ function validateLocationDependency(
 }
 
 const baseSchema = z.object({
-  userId: z.string().regex(/^USR-\d{4}-\d{4}$/, 'User ID must follow USR-YYYY-#### format'),
+  userId: z.string().regex(/^[A-Z]{2,4}-\d{4}-\d{6}$/, 'User ID must follow PREFIX-YYYY-###### format'),
   firstName: z.string().min(1, 'First name is required'),
   middleName: z.string().optional(),
   lastName: z.string().min(1, 'Last name is required'),
@@ -94,7 +92,6 @@ const baseSchema = z.object({
     'bhw',
     'rhm',
     'phn',
-    'phis',
     'cho',
     'system_admin',
   ]),
@@ -236,9 +233,18 @@ export function suggestUsername(firstName: string, lastName: string) {
   return `${first}.${last}`
 }
 
-export function createUserId(seed: number) {
+export const ROLE_PREFIXES: Record<string, string> = {
+  bhw:          'BHW',
+  rhm:          'RHM',
+  phn:          'PHN',
+  cho:          'CHO',
+  system_admin: 'ADM',
+}
+
+export function createUserId(role: string, count: number): string {
   const year = new Date().getFullYear()
-  return `USR-${year}-${String(seed).padStart(4, '0')}`
+  const prefix = ROLE_PREFIXES[role] ?? 'USR'
+  return `${prefix}-${year}-${String(count).padStart(6, '0')}`
 }
 
 export function deriveSoftWarnings(values: Partial<UserFormValues>) {
@@ -272,38 +278,39 @@ export function deriveSoftWarnings(values: Partial<UserFormValues>) {
 }
 
 type BuildDefaultsArgs = {
-  seed: number
+  roleCounts?: Record<string, number>
   user?: AdminUser
 }
 
-export function buildDefaultFormValues({ seed, user }: BuildDefaultsArgs): AddUserValues {
-  const station = healthStationOptions.find((item) => item.label === user?.healthStationName)
+export function buildDefaultFormValues({ roleCounts = {}, user }: BuildDefaultsArgs): AddUserValues {
+  const defaultRole = user?.role ?? 'bhw'
+  const nextCount = (roleCounts[defaultRole] ?? 0) + 1
 
   return {
-    userId: user?.userId ?? createUserId(seed),
+    userId: user?.userId ?? createUserId(defaultRole, nextCount),
     firstName: user?.firstName ?? '',
     middleName: user?.middleName ?? '',
     lastName: user?.lastName ?? '',
-    nameSuffix: '',
-    dateOfBirth: '',
-    sex: 'F',
+    nameSuffix: user?.nameSuffix ?? '',
+    dateOfBirth: user?.dateOfBirth ?? '',
+    sex: user?.sex ?? 'F',
     email: user?.email ?? '',
     mobileNumber: user?.mobileNumber ?? '',
-    alternateMobileNumber: '',
+    alternateMobileNumber: user?.alternateMobileNumber ?? '',
     addressLine1: user?.addressLine1 ?? '',
     addressLine2: user?.addressLine2 ?? '',
     cityMunicipality: user?.cityMunicipality ?? DEFAULT_CITY_MUNICIPALITY,
     province: user?.province ?? DEFAULT_PROVINCE,
     username: user?.username ?? '',
     role: user?.role ?? 'bhw',
-    healthStationId: station?.value ?? '',
-    purokAssignment: '',
-    coverageNotes: '',
-    adminNotes: '',
-    mustChangePassword: user ? user.passwordState === 'change_pending' : true,
+    healthStationId: user?.healthStationId ?? '',
+    purokAssignment: user?.purokAssignment ?? '',
+    coverageNotes: user?.coverageNotes ?? '',
+    adminNotes: user?.adminNotes ?? '',
+    mustChangePassword: user ? user.mustChangePassword : true,
     isActive: user ? user.status === 'active' : true,
-    deactivationReason: '',
+    deactivationReason: user?.deactivationReason ?? '',
     initialPassword: user ? '' : DEFAULT_TEMP_PASSWORD,
-    profilePhotoPath: '',
+    profilePhotoPath: user?.profilePhotoUrl ?? '',
   }
 }

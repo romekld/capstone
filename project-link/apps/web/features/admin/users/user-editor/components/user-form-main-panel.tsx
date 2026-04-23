@@ -69,10 +69,10 @@ import { roleOptions } from '../../data/options'
 import {
   CITY_WIDE_ROLES,
   formatPhoneForInput,
-  healthStationOptions,
   sexOptions,
   suffixOptions,
   type AddUserValues,
+  type HealthStationOption,
 } from '../../data/form-schema'
 
 type UserFormMainPanelProps = {
@@ -82,6 +82,7 @@ type UserFormMainPanelProps = {
   register: UseFormRegister<AddUserValues>
   values: Partial<AddUserValues>
   role: AddUserValues['role']
+  stations: HealthStationOption[]
   isActive: boolean
   showTempPassword: boolean
   setShowTempPassword: Dispatch<SetStateAction<boolean>>
@@ -91,6 +92,7 @@ type UserFormMainPanelProps = {
   setIsStationPickerOpen: Dispatch<SetStateAction<boolean>>
   selectedStationLabel?: string
   onUsernameManualEdit: () => void
+  onSexChange: () => void
   onPhoneChange: (fieldName: 'mobileNumber' | 'alternateMobileNumber', raw: string) => void
   toIsoDate: (date: Date) => string
   parseIsoDate: (value?: string) => Date | undefined
@@ -110,6 +112,7 @@ export function UserFormMainPanel({
   register,
   values,
   role,
+  stations,
   isActive,
   showTempPassword,
   setShowTempPassword,
@@ -119,6 +122,7 @@ export function UserFormMainPanel({
   setIsStationPickerOpen,
   selectedStationLabel,
   onUsernameManualEdit,
+  onSexChange,
   onPhoneChange,
   toIsoDate,
   parseIsoDate,
@@ -231,7 +235,13 @@ export function UserFormMainPanel({
                   name='sex'
                   control={control}
                   render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={(nextValue) => {
+                        field.onChange(nextValue)
+                        onSexChange()
+                      }}
+                      value={field.value}
+                    >
                       <SelectTrigger id='sex' aria-invalid={!!errors.sex} className='w-full'>
                         <SelectValue placeholder='Choose sex' />
                       </SelectTrigger>
@@ -622,15 +632,15 @@ export function UserFormMainPanel({
                         <CommandList>
                           <CommandEmpty>No matching health station found.</CommandEmpty>
                           <CommandGroup heading='Barangay Health Stations'>
-                            {healthStationOptions.map((option) => {
-                              const isSelected = option.value === field.value
+                            {stations.map((station) => {
+                              const isSelected = station.id === field.value
 
                               return (
                                 <CommandItem
-                                  key={option.value}
-                                  value={option.label}
+                                  key={station.id}
+                                  value={station.name}
                                   onSelect={() => {
-                                    field.onChange(option.value)
+                                    field.onChange(station.id)
                                     setIsStationPickerOpen(false)
                                   }}
                                   data-checked={isSelected}
@@ -639,7 +649,8 @@ export function UserFormMainPanel({
                                   <CheckIcon
                                     className={isSelected ? 'opacity-100' : 'opacity-0'}
                                   />
-                                  {option.label}
+                                  {station.name}
+                                  <span className='ml-auto text-xs text-muted-foreground'>{station.stationCode}</span>
                                 </CommandItem>
                               )
                             })}

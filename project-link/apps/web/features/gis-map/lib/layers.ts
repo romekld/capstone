@@ -5,6 +5,7 @@ import type {
 } from 'maplibre-gl'
 import type {
   GisMapStyleMode,
+  GisPointFeatureCollection,
   GisPolygonFeatureCollection,
   GisPreviewFeatureCollection,
 } from '../data/types'
@@ -19,6 +20,11 @@ export const GIS_BOUNDARY_SELECTED_LINE_LAYER = 'gis-boundaries-selected-line'
 export const GIS_PREVIEW_SOURCE = 'gis-preview'
 export const GIS_PREVIEW_FILL_LAYER = 'gis-preview-fill'
 export const GIS_PREVIEW_LINE_LAYER = 'gis-preview-line'
+export const GIS_POINT_SOURCE = 'gis-points'
+export const GIS_POINT_HALO_LAYER = 'gis-points-halo'
+export const GIS_POINT_LAYER = 'gis-points-layer'
+export const GIS_POINT_HOVER_LAYER = 'gis-points-hover'
+export const GIS_POINT_SELECTED_LAYER = 'gis-points-selected'
 
 type SourceData = Parameters<GeoJSONSource['setData']>[0]
 
@@ -60,13 +66,24 @@ export function setPreviewGeometry(
   source?.setData(toPreviewFeatureCollection(geometry) as SourceData)
 }
 
+export function setPointSourceData(
+  map: MapLibreMap,
+  pointCollection: GisPointFeatureCollection
+) {
+  const source = map.getSource(GIS_POINT_SOURCE) as GeoJSONSource | undefined
+  source?.setData(pointCollection as SourceData)
+}
+
 export function ensureGisLayers(
   map: MapLibreMap,
   featureCollection: GisPolygonFeatureCollection,
   previewGeometry: GisGeometry | null,
   selectedId: string | null,
   hoveredId: string | null,
-  mode: GisMapStyleMode
+  mode: GisMapStyleMode,
+  pointCollection?: GisPointFeatureCollection | null,
+  selectedPointId?: string | null,
+  hoveredPointId?: string | null
 ) {
   const beforeId = getFirstSymbolLayerId(map)
   const colors = getBoundaryColors(mode)
@@ -236,8 +253,107 @@ export function ensureGisLayers(
     )
   }
 
+  if (pointCollection) {
+    if (!map.getSource(GIS_POINT_SOURCE)) {
+      map.addSource(GIS_POINT_SOURCE, {
+        type: 'geojson',
+        data: pointCollection as SourceData,
+      })
+    } else {
+      setPointSourceData(map, pointCollection)
+    }
+
+    if (!map.getLayer(GIS_POINT_HALO_LAYER)) {
+      map.addLayer(
+        {
+          id: GIS_POINT_HALO_LAYER,
+          type: 'circle',
+          source: GIS_POINT_SOURCE,
+          paint: {
+            'circle-color': [
+              'case',
+              ['==', ['get', 'pinStatus'], 'pinned'],
+              colors.pointPinnedFill,
+              ['==', ['get', 'pinStatus'], 'draft'],
+              colors.pointDraftFill,
+              colors.pointNeedsPinFill,
+            ],
+            'circle-opacity': 0.18,
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 7, 8, 13, 14],
+          },
+        },
+        beforeId
+      )
+    }
+
+    if (!map.getLayer(GIS_POINT_LAYER)) {
+      map.addLayer(
+        {
+          id: GIS_POINT_LAYER,
+          type: 'circle',
+          source: GIS_POINT_SOURCE,
+          paint: {
+            'circle-color': [
+              'case',
+              ['==', ['get', 'pinStatus'], 'pinned'],
+              colors.pointPinnedFill,
+              ['==', ['get', 'pinStatus'], 'draft'],
+              colors.pointDraftFill,
+              colors.pointNeedsPinFill,
+            ],
+            'circle-opacity': 0.96,
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 7, 5.5, 13, 8.5],
+            'circle-stroke-color': colors.pointStroke,
+            'circle-stroke-width': 2,
+          },
+        },
+        beforeId
+      )
+    }
+
+    if (!map.getLayer(GIS_POINT_HOVER_LAYER)) {
+      map.addLayer(
+        {
+          id: GIS_POINT_HOVER_LAYER,
+          type: 'circle',
+          source: GIS_POINT_SOURCE,
+          filter: ['==', ['get', 'id'], hoveredPointId ?? ''],
+          paint: {
+            'circle-color': colors.pointHoverFill,
+            'circle-opacity': 0.18,
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 7, 10, 13, 16],
+            'circle-stroke-color': colors.pointHoverStroke,
+            'circle-stroke-width': 2,
+          },
+        },
+        beforeId
+      )
+    }
+
+    if (!map.getLayer(GIS_POINT_SELECTED_LAYER)) {
+      map.addLayer(
+        {
+          id: GIS_POINT_SELECTED_LAYER,
+          type: 'circle',
+          source: GIS_POINT_SOURCE,
+          filter: ['==', ['get', 'id'], selectedPointId ?? ''],
+          paint: {
+            'circle-color': colors.pointSelectedFill,
+            'circle-opacity': 0.2,
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 7, 11, 13, 18],
+            'circle-stroke-color': colors.pointSelectedStroke,
+            'circle-stroke-width': 3,
+          },
+        },
+        beforeId
+      )
+    }
+  }
+
   setHoveredBoundary(map, hoveredId)
   setSelectedBoundary(map, selectedId)
+  setHoveredPoint(map, hoveredPointId ?? null)
+  setSelectedPoint(map, selectedPointId ?? null)
 }
 
 function getBoundaryColors(mode: GisMapStyleMode) {
@@ -260,6 +376,14 @@ function getBoundaryColors(mode: GisMapStyleMode) {
       stagedAddLine: '#bfdbfe',
       stagedRemoveLine: '#fcd34d',
       stagedFillOpacity: 0.32,
+      pointPinnedFill: '#38bdf8',
+      pointNeedsPinFill: '#94a3b8',
+      pointDraftFill: '#f59e0b',
+      pointStroke: '#0f172a',
+      pointHoverFill: '#60a5fa',
+      pointHoverStroke: '#dbeafe',
+      pointSelectedFill: '#22c55e',
+      pointSelectedStroke: '#dcfce7',
     }
   }
 
@@ -281,6 +405,14 @@ function getBoundaryColors(mode: GisMapStyleMode) {
     stagedAddLine: '#1d4ed8',
     stagedRemoveLine: '#b45309',
     stagedFillOpacity: 0.24,
+    pointPinnedFill: '#0284c7',
+    pointNeedsPinFill: '#64748b',
+    pointDraftFill: '#d97706',
+    pointStroke: '#ffffff',
+    pointHoverFill: '#3b82f6',
+    pointHoverStroke: '#dbeafe',
+    pointSelectedFill: '#16a34a',
+    pointSelectedStroke: '#dcfce7',
   }
 }
 
@@ -304,5 +436,19 @@ function toPreviewFeatureCollection(
           },
         ]
       : [],
+  }
+}
+
+export function setSelectedPoint(map: MapLibreMap, id: string | null) {
+  if (!map.getLayer(GIS_POINT_SELECTED_LAYER)) return
+
+  map.setFilter(GIS_POINT_SELECTED_LAYER, ['==', ['get', 'id'], id ?? ''])
+}
+
+export function setHoveredPoint(map: MapLibreMap, id: string | null) {
+  const filter: FilterSpecification = ['==', ['get', 'id'], id ?? '']
+
+  if (map.getLayer(GIS_POINT_HOVER_LAYER)) {
+    map.setFilter(GIS_POINT_HOVER_LAYER, filter)
   }
 }

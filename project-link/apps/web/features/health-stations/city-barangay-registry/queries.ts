@@ -1,195 +1,254 @@
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
 import { cache } from 'react'
+import { createClient } from '@/lib/supabase/server'
 import type {
   CityBarangayGeometryVersion,
   CityBarangayImportItem,
   CityBarangayImportJob,
   CityBarangayRegistryData,
   CityBarangayRegistryRecord,
-  CityBarangaySourceProperties,
+  CityBarangayRegistryStats,
+  GeoJsonGeometry,
 } from './data/schema'
-import type { SourceFeatureCollection } from './data/geojson'
 
-const GIS_ROOT = path.join(process.cwd(), '..', '..', 'docs', 'gis')
-
-async function readGeoJson(filename: string): Promise<SourceFeatureCollection> {
-  const file = await readFile(path.join(GIS_ROOT, filename), 'utf8')
-  return JSON.parse(file) as SourceFeatureCollection
+// Row shape returned by city_barangay_registry_view.
+type RegistryViewRow = {
+  id: string
+  name: string
+  pcode: string
+  city: string
+  source_fid: number | null
+  source_date: string | null
+  source_valid_on: string | null
+  source_valid_to: string | null
+  source_area_sqkm: number | null
+  source_payload: Record<string, unknown> | null
+  updated_at: string | null
+  geometry: GeoJsonGeometry
+  in_cho_scope: boolean
+  version_count: number
 }
 
-function toId(pcode: string) {
-  return `city-barangay-${pcode.toLowerCase()}`
-}
-
-function toVersion(record: CityBarangayRegistryRecord): CityBarangayGeometryVersion {
+function mapRegistryRow(row: RegistryViewRow): CityBarangayRegistryRecord {
   return {
-    id: `version-${record.pcode}-1`,
-    cityBarangayId: record.id,
-    versionNo: 1,
-    changeType: 'create',
-    reason: 'Initial GeoJSON import',
-    changedBy: 'System Admin',
-    changedAt: record.sourceValidOn || record.sourceDate,
-    sourcePayload: record.sourcePayload,
+    id: row.id,
+    name: row.name,
+    pcode: row.pcode,
+    city: row.city,
+    sourceFid: row.source_fid ?? 0,
+    sourceDate: row.source_date ?? '',
+    sourceValidOn: row.source_valid_on ?? '',
+    sourceValidTo: row.source_valid_to ?? null,
+    sourceAreaSqKm: row.source_area_sqkm ?? 0,
+    inCho2Scope: row.in_cho_scope,
+    geometry: row.geometry,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sourcePayload: (row.source_payload ?? {}) as any,
+    versionCount: row.version_count ?? 0,
+    updatedAt: row.updated_at ?? row.source_valid_on ?? '',
   }
 }
 
-function buildStats(records: CityBarangayRegistryRecord[]) {
-  const sourceDates = new Set(records.map((record) => record.sourceDate).filter(Boolean))
-  const validOnDates = new Set(
-    records.map((record) => record.sourceValidOn).filter(Boolean)
-  )
+function buildStats(records: CityBarangayRegistryRecord[]): CityBarangayRegistryStats {
+  const sourceDates = new Set(records.map((r) => r.sourceDate).filter(Boolean))
+  const validOnDates = new Set(records.map((r) => r.sourceValidOn).filter(Boolean))
   const latestUpdatedAt = records
-    .map((record) => record.updatedAt)
+    .map((r) => r.updatedAt)
     .filter(Boolean)
     .sort()
-    .at(-1)
+    .at(-1) ?? null
 
   return {
     totalBarangays: records.length,
-    inCho2Scope: records.filter((record) => record.inCho2Scope).length,
-    outsideCho2Scope: records.filter((record) => !record.inCho2Scope).length,
-    sourceDate: sourceDates.size === 1 ? Array.from(sourceDates)[0] : null,
-    validOn: validOnDates.size === 1 ? Array.from(validOnDates)[0] : null,
-    totalAreaSqKm: records.reduce(
-      (total, record) => total + record.sourceAreaSqKm,
-      0
-    ),
-    latestUpdatedAt: latestUpdatedAt ?? null,
+    inCho2Scope: records.filter((r) => r.inCho2Scope).length,
+    outsideCho2Scope: records.filter((r) => !r.inCho2Scope).length,
+    sourceDate: sourceDates.size === 1 ? [...sourceDates][0] : null,
+    validOn: validOnDates.size === 1 ? [...validOnDates][0] : null,
+    totalAreaSqKm: records.reduce((sum, r) => sum + r.sourceAreaSqKm, 0),
+    latestUpdatedAt,
   }
 }
 
-function buildImportJob(items: CityBarangayImportItem[]): CityBarangayImportJob {
-  const validItems = items.filter((item) => item.action !== 'invalid')
-
+function buildEmptyImportJob(): CityBarangayImportJob {
   return {
-    id: 'sample-import-job-dasmarinas',
-    filename: 'dasmarinas_boundaries.geojson',
-    status: 'validated',
-    totalFeatures: items.length,
-    validFeatures: validItems.length,
-    errorFeatures: items.length - validItems.length,
-    duplicateFeatures: items.filter((item) =>
-      ['review_required', 'overwrite', 'skip'].includes(item.action)
-    ).length,
-    payloadSizeBytes: 479389,
-    createdAt: '2026-04-18T00:00:00.000Z',
-    validatedAt: '2026-04-18T00:01:00.000Z',
+    id: '',
+    filename: '',
+    status: 'uploaded',
+    totalFeatures: 0,
+    validFeatures: 0,
+    errorFeatures: 0,
+    duplicateFeatures: 0,
+    payloadSizeBytes: 0,
+    createdAt: new Date().toISOString(),
+    validatedAt: null,
     committedAt: null,
   }
 }
 
-function makeImportItem(
-  record: CityBarangayRegistryRecord,
-  index: number,
-  action: CityBarangayImportItem['action']
-): CityBarangayImportItem {
-  return {
-    id: `sample-import-item-${record.pcode}`,
-    jobId: 'sample-import-job-dasmarinas',
-    featureIndex: index,
-    pcode: record.pcode,
-    name: record.name,
-    action,
-    validationErrors: [],
-    geometry: record.geometry,
-    selectedOverwrite: action === 'overwrite',
-    existingCityBarangayId: record.id,
-    existingBarangayName: record.name,
-    processedAt: action === 'skip' ? '2026-04-18T00:02:00.000Z' : null,
-    sourcePayload: record.sourcePayload,
-  }
-}
-
-function buildImportItems(records: CityBarangayRegistryRecord[]) {
-  const sample = records.slice(0, 5).map((record, index) => {
-    const actions: CityBarangayImportItem['action'][] = [
-      'review_required',
-      'overwrite',
-      'skip',
-      'review_required',
-      'create',
-    ]
-    const item = makeImportItem(record, index + 1, actions[index])
-
-    if (item.action === 'create') {
-      return {
-        ...item,
-        id: 'sample-import-item-new-boundary',
-        pcode: 'PH0402106999',
-        name: 'Sample New Barangay Boundary',
-        existingCityBarangayId: null,
-        existingBarangayName: null,
-      }
-    }
-
-    return item
-  })
-
-  return [
-    ...sample,
-    {
-      id: 'sample-import-item-invalid',
-      jobId: 'sample-import-job-dasmarinas',
-      featureIndex: 6,
-      pcode: null,
-      name: 'Unnamed boundary',
-      action: 'invalid',
-      validationErrors: ['Missing ADM4_PCODE or pcode', 'Missing geometry'],
-      geometry: null,
-      selectedOverwrite: false,
-      existingCityBarangayId: null,
-      existingBarangayName: null,
-      processedAt: null,
-      sourcePayload: null,
-    } satisfies CityBarangayImportItem,
-  ]
-}
-
 export const getCityBarangayRegistryData = cache(
   async (): Promise<CityBarangayRegistryData> => {
-    const [registryGeoJson, cho2GeoJson] = await Promise.all([
-      readGeoJson('dasmarinas_boundaries.geojson'),
-      readGeoJson('cho2_boundaries.geojson'),
-    ])
+    const supabase = await createClient()
 
-    const cho2Pcodes = new Set(
-      cho2GeoJson.features.map((feature) => feature.properties.ADM4_PCODE)
-    )
+    const { data: rows, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from('city_barangay_registry_view' as any)
+      .select('*')
 
-    const records = registryGeoJson.features
-      .map((feature) => {
-        const properties = feature.properties as CityBarangaySourceProperties
+    if (error) throw error
 
-        return {
-          id: toId(properties.ADM4_PCODE),
-          name: properties.ADM4_EN,
-          pcode: properties.ADM4_PCODE,
-          city: properties.ADM3_EN,
-          sourceFid: properties.fid,
-          sourceDate: properties.date,
-          sourceValidOn: properties.validOn,
-          sourceValidTo: properties.validTo,
-          sourceAreaSqKm: properties.AREA_SQKM,
-          inCho2Scope: cho2Pcodes.has(properties.ADM4_PCODE),
-          geometry: feature.geometry,
-          sourcePayload: properties,
-          versionCount: 1,
-          updatedAt: properties.validOn || properties.date,
-        } satisfies CityBarangayRegistryRecord
-      })
+    const records = ((rows ?? []) as RegistryViewRow[])
+      .map(mapRegistryRow)
       .sort((a, b) => a.name.localeCompare(b.name))
 
-    const importItems = buildImportItems(records)
+    // Fetch geometry versions (one query for all, grouped client-side).
+    const { data: versionRows } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from('city_barangay_geometry_versions' as any)
+      .select('id, city_barangay_id, version_no, change_type, reason, changed_by, changed_at, source_payload')
+      .order('version_no', { ascending: false })
+
+    const geometryVersions: CityBarangayGeometryVersion[] = (
+      (versionRows ?? []) as {
+        id: string
+        city_barangay_id: string
+        version_no: number
+        change_type: string
+        reason: string
+        changed_by: string | null
+        changed_at: string
+        source_payload: Record<string, unknown>
+      }[]
+    ).map((v) => ({
+      id: v.id,
+      cityBarangayId: v.city_barangay_id,
+      versionNo: v.version_no,
+      changeType: v.change_type as CityBarangayGeometryVersion['changeType'],
+      reason: v.reason,
+      changedBy: v.changed_by ?? 'System',
+      changedAt: v.changed_at,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      sourcePayload: (v.source_payload ?? {}) as any,
+    }))
+
+    // Fetch latest import job (if any).
+    const { data: jobRow } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from('city_barangay_import_jobs' as any)
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    let importJob: CityBarangayImportJob = buildEmptyImportJob()
+    let importItems: CityBarangayImportItem[] = []
+
+    if (jobRow) {
+      const j = jobRow as {
+        id: string
+        filename: string
+        status: string
+        total_features: number
+        valid_features: number
+        error_features: number
+        duplicate_features: number
+        payload_size_bytes: number | null
+        created_at: string
+        validated_at: string | null
+        committed_at: string | null
+      }
+      importJob = {
+        id: j.id,
+        filename: j.filename,
+        status: j.status as CityBarangayImportJob['status'],
+        totalFeatures: j.total_features,
+        validFeatures: j.valid_features,
+        errorFeatures: j.error_features,
+        duplicateFeatures: j.duplicate_features,
+        payloadSizeBytes: j.payload_size_bytes ?? 0,
+        createdAt: j.created_at,
+        validatedAt: j.validated_at,
+        committedAt: j.committed_at,
+      }
+
+      const { data: itemRows } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from('city_barangay_import_items' as any)
+        .select('*')
+        .eq('job_id', j.id)
+        .order('feature_index')
+
+      importItems = ((itemRows ?? []) as {
+        id: string
+        job_id: string
+        feature_index: number
+        pcode: string | null
+        name: string | null
+        action: string
+        validation_errors: string[]
+        normalized_geometry: GeoJsonGeometry | null
+        source_payload: Record<string, unknown> | null
+        selected_overwrite: boolean
+        existing_city_barangay_id: string | null
+        processed_at: string | null
+      }[]).map((item) => ({
+        id: item.id,
+        jobId: item.job_id,
+        featureIndex: item.feature_index,
+        pcode: item.pcode,
+        name: item.name,
+        action: item.action as CityBarangayImportItem['action'],
+        validationErrors: item.validation_errors ?? [],
+        geometry: item.normalized_geometry,
+        selectedOverwrite: item.selected_overwrite,
+        existingCityBarangayId: item.existing_city_barangay_id,
+        existingBarangayName: null,
+        processedAt: item.processed_at,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sourcePayload: (item.source_payload ?? null) as any,
+      }))
+    }
 
     return {
       records,
-      geometryVersions: records.map(toVersion),
-      importJob: buildImportJob(importItems),
+      geometryVersions,
+      importJob,
       importItems,
       stats: buildStats(records),
     }
   }
 )
 
+export async function getGeometryVersions(
+  cityBarangayId: string
+): Promise<CityBarangayGeometryVersion[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from('city_barangay_geometry_versions' as any)
+    .select('id, city_barangay_id, version_no, change_type, reason, changed_by, changed_at, source_payload')
+    .eq('city_barangay_id', cityBarangayId)
+    .order('version_no', { ascending: false })
+
+  if (error) throw error
+
+  return ((data ?? []) as {
+    id: string
+    city_barangay_id: string
+    version_no: number
+    change_type: string
+    reason: string
+    changed_by: string | null
+    changed_at: string
+    source_payload: Record<string, unknown>
+  }[]).map((v) => ({
+    id: v.id,
+    cityBarangayId: v.city_barangay_id,
+    versionNo: v.version_no,
+    changeType: v.change_type as CityBarangayGeometryVersion['changeType'],
+    reason: v.reason,
+    changedBy: v.changed_by ?? 'System',
+    changedAt: v.changed_at,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sourcePayload: (v.source_payload ?? {}) as any,
+  }))
+}

@@ -67,7 +67,7 @@ export function RegistryTable({
     initialState: {
       pagination: {
         pageIndex: 0,
-        pageSize: 10,
+        pageSize: 8,
       },
       columnVisibility: {
         city: false,

@@ -16,7 +16,9 @@ const RegistryMapCanvas = dynamic(
     import('./registry-map-canvas').then((module) => module.RegistryMapCanvas),
   {
     ssr: false,
-    loading: () => <Skeleton className='h-full min-h-[520px] w-full' />,
+    loading: () => (
+      <Skeleton className='h-full min-h-[320px] w-full md:min-h-[420px] xl:min-h-0' />
+    ),
   }
 )
 

@@ -45,7 +45,6 @@ Execution priority:
 ## 4) BHW PWA Mobile-First Requirements (Non-Negotiable)
 
 - Start with unprefixed mobile utilities, then enhance upward with `sm:`, `md:`, `lg:`.
-- Minimum interactive touch target: `44x44px`; keep adequate spacing between actions.
 - No hover-only critical interactions.
 - No horizontal scrolling on mobile.
 - Prefer `min-h-dvh` for full-height mobile layouts.
@@ -62,7 +61,7 @@ Execution priority:
 
 ## 6) Project-Specific Frontend Constraints
 
-- Respect current shadcn setup: `style: radix-nova`, `baseColor: mist`, `iconLibrary: lucide`.
+- Respect current shadcn setup.
 - Use Tailwind v4 CSS-first approach; keep tokens in `project-link/apps/web/app/globals.css`.
 - Do not introduce `tailwind.config.js`.
 - Use `@/` alias for internal imports.

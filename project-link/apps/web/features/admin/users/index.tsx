@@ -1,36 +1,41 @@
 "use client"
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { UserRoundPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/page-header'
 import type { AdminUser } from './data/schema'
-import { createMockUsers } from './data/users'
 import { UsersStats } from './components/users-stats'
 import { UsersTable } from './components/users-table'
+import { resetPasswordsAction, setUserStatusAction } from './actions'
 
-export function AdminUsersPage() {
-    const [users, setUsers] = useState<AdminUser[]>(() => createMockUsers(38))
+type AdminUsersPageProps = {
+    users: AdminUser[]
+}
 
-    function handleResetPasswords(userIds: string[]) {
-        const ids = new Set(userIds)
+export function AdminUsersPage({ users }: AdminUsersPageProps) {
+    const router = useRouter()
 
-        setUsers((current) =>
-            current.map((user) =>
-                ids.has(user.id) ? { ...user, passwordState: 'change_pending' } : user
-            )
-        )
+    async function handleResetPasswords(userIds: string[]) {
+        const result = await resetPasswordsAction(userIds)
+        if ('error' in result) {
+            toast.error(result.error)
+            return
+        }
+        toast.success('Passwords flagged for reset.')
+        router.refresh()
     }
 
-    function handleSetStatus(userIds: string[], nextStatus: 'active' | 'inactive') {
-        const ids = new Set(userIds)
-
-        setUsers((current) =>
-            current.map((user) =>
-                ids.has(user.id) ? { ...user, status: nextStatus } : user
-            )
-        )
+    async function handleSetStatus(userIds: string[], nextStatus: 'active' | 'inactive') {
+        const result = await setUserStatusAction(userIds, nextStatus)
+        if ('error' in result) {
+            toast.error(result.error)
+            return
+        }
+        toast.success(`${userIds.length} user${userIds.length !== 1 ? 's' : ''} set to ${nextStatus}.`)
+        router.refresh()
     }
 
     return (
@@ -42,7 +47,7 @@ export function AdminUsersPage() {
                     <Button asChild className='h-10 px-4'>
                         <Link href='/admin/users/new'>
                             Add User
-                            <UserRoundPlus data-icon='inline-end' />
+                            <UserRoundPlus />
                         </Link>
                     </Button>
                 }

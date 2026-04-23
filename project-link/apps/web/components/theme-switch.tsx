@@ -1,7 +1,7 @@
 "use client"
 
 import { LaptopIcon, MoonIcon, SunIcon } from "lucide-react"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/theme-provider"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -21,9 +21,21 @@ const themeOptions = [
   { value: "system", label: "System", icon: LaptopIcon },
 ] as const
 
+type ThemeOption = (typeof themeOptions)[number]["value"]
+
+function isThemeOption(value: string): value is ThemeOption {
+  return themeOptions.some((option) => option.value === value)
+}
+
 export function ThemeSwitch() {
   const { theme, setTheme } = useTheme()
   const currentTheme = theme ?? "system"
+
+  function handleThemeChange(value: string) {
+    if (isThemeOption(value)) {
+      setTheme(value)
+    }
+  }
 
   return (
     <DropdownMenu modal={false}>
@@ -43,7 +55,7 @@ export function ThemeSwitch() {
         <DropdownMenuLabel>Theme</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuRadioGroup value={currentTheme} onValueChange={setTheme}>
+          <DropdownMenuRadioGroup value={currentTheme} onValueChange={handleThemeChange}>
             {themeOptions.map((option) => {
               const Icon = option.icon
 

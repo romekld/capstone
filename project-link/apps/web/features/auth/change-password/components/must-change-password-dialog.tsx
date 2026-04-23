@@ -1,6 +1,8 @@
 "use client"
 
-import { useActionState, useState } from "react"
+import { useActionState, useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { AlertCircleIcon, EyeIcon, EyeOffIcon } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -23,12 +25,22 @@ type MustChangePasswordDialogProps = {
 export function MustChangePasswordDialog({
   initialOpen = false,
 }: MustChangePasswordDialogProps) {
+  const router = useRouter()
   const [dismissed, setDismissed] = useState(false)
   const [state, action, isPending] = useActionState(changePasswordAction, null)
   const [showNew, setShowNew] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const successFired = useRef(false)
   const formId = "must-change-password-form"
   const open = initialOpen && !dismissed && !state?.success
+
+  useEffect(() => {
+    if (state?.success && !successFired.current) {
+      successFired.current = true
+      toast.success("Password updated. You're all set!")
+      router.refresh()
+    }
+  }, [state, router])
 
   return (
     <Dialog

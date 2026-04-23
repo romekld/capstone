@@ -39,7 +39,7 @@ export function CoverageLeftPanel({
   const stagedCount = stats.stagedAdds + stats.stagedRemoves
 
   return (
-    <aside className='flex min-h-0 flex-col gap-3 p-px pb-3 xl:sticky xl:top-0 xl:h-full xl:self-start xl:overflow-y-auto'>
+    <aside className='flex min-h-0 flex-col gap-3 p-px pb-3 xl:sticky xl:top-0 xl:h-full xl:self-start xl:overflow-y-auto xl:overscroll-contain'>
       <Card size='sm'>
         <CardHeader>
           <CardTitle>Coverage Overview</CardTitle>

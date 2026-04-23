@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useTransition } from 'react'
+import { applyCoverageChangesAction } from '../actions'
 import { FolderInput, MapIcon, MapPinnedIcon, FileCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -51,6 +52,8 @@ export function RegistryPageShell({ data, mode }: RegistryPageShellProps) {
   )
   const [stagedChanges, setStagedChanges] = useState<CoverageStagedChanges>({})
   const [batchReason, setBatchReason] = useState('')
+  const [applyError, setApplyError] = useState<string | null>(null)
+  const [, startApplyTransition] = useTransition()
 
   const selectedRecord = useMemo(
     () => data.records.find((record) => record.pcode === selectedPcode) ?? null,
@@ -187,8 +190,21 @@ export function RegistryPageShell({ data, mode }: RegistryPageShellProps) {
   }
 
   function handleApplyCoverage() {
+    setApplyError(null)
+    const snapshot = { ...stagedChanges }
+    // Optimistic: clear staged changes immediately.
     setStagedChanges(resetCoverageChanges())
     setBatchReason('')
+
+    startApplyTransition(async () => {
+      const result = await applyCoverageChangesAction(snapshot, batchReason)
+      if ('error' in result) {
+        // Restore staged changes if the server action failed.
+        setStagedChanges(snapshot)
+        setBatchReason(batchReason)
+        setApplyError(result.error)
+      }
+    })
   }
 
   return (
@@ -236,16 +252,16 @@ export function RegistryPageShell({ data, mode }: RegistryPageShellProps) {
                 <TabsList>
                   <TabsTrigger value='registry'>
                     <MapIcon />
-                    Registry
+                    Barangays
                   </TabsTrigger>
                   <TabsTrigger value='coverage'>
                     <MapPinnedIcon />
-                    Coverage Planner
+                    Manage Coverage
                   </TabsTrigger>
                   {isAdmin ? (
                     <TabsTrigger value='import'>
                       <FileCheck />
-                      GeoJSON Review
+                      Add Barangay
                     </TabsTrigger>
                   ) : null}
                 </TabsList>
@@ -263,7 +279,7 @@ export function RegistryPageShell({ data, mode }: RegistryPageShellProps) {
               </div>
             </div>
 
-            <div className='h-[min(60svh,600px)] min-h-[500px]'>
+            <div className='h-[min(55svh,600px)] min-h-[320px] xl:h-[min(45svh,520px)] xl:min-h-0'>
               <RegistryMapPanel
                 coverageRecords={coverageRecords}
                 mode={activeTab === 'coverage' ? 'coverage' : 'registry'}
@@ -300,6 +316,7 @@ export function RegistryPageShell({ data, mode }: RegistryPageShellProps) {
                 records={coverageRecords}
                 selectedPcode={selectedPcode}
                 stats={coverageStats}
+                applyError={applyError}
               />
             </TabsContent>
 

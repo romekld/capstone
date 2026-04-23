@@ -64,7 +64,7 @@ export function getUsersColumns({
         return (
           <div className='flex min-w-32 items-center gap-3'>
             <Avatar className='size-9 rounded-lg'>
-              <AvatarImage alt={`${user.firstName} ${user.lastName}`} src='' />
+              <AvatarImage alt={`${user.firstName} ${user.lastName}`} src={user.profilePhotoUrl} />
               <AvatarFallback>
                 {getInitials(user.firstName, user.lastName)}
               </AvatarFallback>

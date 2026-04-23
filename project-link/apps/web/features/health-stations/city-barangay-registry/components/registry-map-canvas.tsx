@@ -89,7 +89,7 @@ export function RegistryMapCanvas({
 
   return (
     <GisMapShell
-      className='min-h-[520px]'
+      className='min-h-[320px] md:min-h-[420px] xl:min-h-0'
       featureCollection={featureCollection}
       onMapMoveStart={() => setPopup(null)}
       onPolygonClick={handlePolygonClick}

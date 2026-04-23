@@ -84,7 +84,7 @@ export function CoverageTable({
     initialState: {
       pagination: {
         pageIndex: 0,
-        pageSize: 10,
+        pageSize: 8,
       },
       columnVisibility: {
         sourceDate: false,

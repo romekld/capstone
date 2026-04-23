@@ -73,7 +73,7 @@ export function ImportReviewTable({
     initialState: {
       pagination: {
         pageIndex: 0,
-        pageSize: 10,
+        pageSize: 8,
       },
     },
     globalFilterFn: (row, _columnId, value) => {

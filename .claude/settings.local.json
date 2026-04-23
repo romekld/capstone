@@ -1,10 +1,13 @@
 {
-  "enabledPlugins": {
-    "vercel@claude-plugins-official": false
-  },
   "permissions": {
     "allow": [
-      "mcp__plugin_supabase_supabase__generate_typescript_types"
+      "mcp__plugin_supabase_supabase__generate_typescript_types",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('mcpServers', {}\\), indent=2\\)\\)\")",
+      "Bash(node *)",
+      "Skill(update-config)"
     ]
+  },
+  "enabledPlugins": {
+    "vercel@claude-plugins-official": false
   }
 }

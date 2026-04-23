@@ -29,6 +29,7 @@ type CoveragePlannerPanelProps = {
   ) => void
   onUndo: (record: CoveragePlannerRecord) => void
   onUndoSelected: (records: CoveragePlannerRecord[]) => void
+  applyError?: string | null
 }
 
 export function CoveragePlannerPanel({
@@ -44,6 +45,7 @@ export function CoveragePlannerPanel({
   onStageSelected,
   onUndo,
   onUndoSelected,
+  applyError,
 }: CoveragePlannerPanelProps) {
   const [applyOpen, setApplyOpen] = useState(false)
   const [reviewOpen, setReviewOpen] = useState(false)
@@ -52,6 +54,12 @@ export function CoveragePlannerPanel({
 
   return (
     <div className='flex flex-col gap-4'>
+      {applyError && (
+        <Alert variant='destructive'>
+          <AlertTitle>Coverage change failed</AlertTitle>
+          <AlertDescription>{applyError}</AlertDescription>
+        </Alert>
+      )}
       <div className='flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card p-3'>
         <div className='min-w-0'>
           <p className='font-medium'>Coverage staging</p>
