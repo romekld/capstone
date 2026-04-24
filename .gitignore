@@ -1,6 +1,7 @@
 .env
 .mcp.json
 /node_modules/
+/project-link/
 
 ### AL ###
 #Template for AL projects for Dynamics 365 Business Central
