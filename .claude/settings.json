@@ -1,5 +1,8 @@
 {
-  "enabledMcpjsonServers": ["supabase", "supabase-ci"],
+  "enabledMcpjsonServers": [
+    "supabase",
+    "supabase-ci"
+  ],
   "permissions": {
     "allow": [
       "Bash(pnpm build:*)",
@@ -47,5 +50,31 @@
     "code-simplifier@claude-plugins-official": true,
     "supabase@claude-plugins-official": true,
     "vercel@claude-plugins-official": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "code-review-graph update --skip-flows",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "code-review-graph status",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }
