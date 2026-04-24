@@ -1,1 +1,0 @@
-export { PinsWorkspacePage } from './components/pins-workspace-page'
